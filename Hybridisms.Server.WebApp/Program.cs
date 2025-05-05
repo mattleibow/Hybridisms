@@ -1,3 +1,4 @@
+using Hybridisms.Server.Shared.Services;
 using Hybridisms.Server.WebApp.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+// Add controller services
+builder.Services.AddControllers();
+
+// Add server-side services
+builder.Services.AddScoped<WeatherForecastService>();
 
 var app = builder.Build();
 
@@ -33,5 +40,8 @@ app.MapRazorComponents<App>()
     .AddAdditionalAssemblies(typeof(Hybridisms.Server.Shared._Imports).Assembly)
     .AddAdditionalAssemblies(typeof(Hybridisms.Client.Shared._Imports).Assembly)
     .AddAdditionalAssemblies(typeof(Hybridisms.Client.WebAssembly._Imports).Assembly);
+
+// Map controller endpoints
+app.MapControllers();
 
 app.Run();
