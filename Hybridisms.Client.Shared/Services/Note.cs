@@ -1,7 +1,9 @@
 namespace Hybridisms.Client.Shared.Services;
 
-public class WeatherForecast
+public class Note
 {
+    public Guid Id { get; set; }
+
     public DateOnly Date { get; set; }
 
     public int TemperatureC { get; set; }

@@ -1,25 +1,24 @@
-﻿@page "/weather"
+﻿@page "/notes"
 @using Hybridisms.Client.Shared.Services
-@using Hybridisms.Server.Shared.Services
 @attribute [StreamRendering]
 
-@inject WeatherForecastService ForecastService
+@inject INotesService NotesService
 
-<PageTitle>Weather</PageTitle>
+<PageTitle>Notes</PageTitle>
 
-<script src="@Assets["_content/Hybridisms.Server.Shared/components/weather.js"]"></script>
+<script src="@Assets["_content/Hybridisms.Client.Shared/components/notes.js"]"></script>
 
-<h1>Weather</h1>
+<h1>Notes</h1>
 
 <p>This component demonstrates showing data.</p>
 
-@if (forecasts == null)
+@if (notes == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <button class="btn btn-primary" onclick="refreshWeatherTable()">Refresh</button>
+    <button class="btn btn-primary" onclick="refreshNotesTable()">Refresh</button>
 
     <table class="table" id="weatherTable">
         <thead>
@@ -31,13 +30,13 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var note in notes)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>@note.Date.ToShortDateString()</td>
+                    <td>@note.TemperatureC</td>
+                    <td>@note.TemperatureF</td>
+                    <td>@note.Summary</td>
                 </tr>
             }
         </tbody>
@@ -47,10 +46,10 @@ else
 <p>Render Mode: @RendererInfo.Name</p>
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private IList<Note>? notes;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastsAsync();
+        notes = await NotesService.GetNotesAsync();
     }
 }
