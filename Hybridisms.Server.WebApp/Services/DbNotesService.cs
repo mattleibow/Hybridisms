@@ -20,6 +20,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
 
             notes.Add(new Note
             {
+                Id = e.Id,
                 Date = e.Date,
                 TemperatureC = e.TemperatureC,
                 Summary = e.Summary
