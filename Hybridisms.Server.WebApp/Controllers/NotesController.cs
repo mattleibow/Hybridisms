@@ -10,9 +10,13 @@ public class NotesController(INotesService noteService) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetNotes()
     {
-        var notes = await noteService.GetNotesAsync();
-
-        if (notes?.Count >= 0)
+        var notes = new List<Note>();
+        await foreach (var note in noteService.GetNotesAsync())
+        {
+            notes.Add(note);
+        }
+        
+        if (notes.Count >= 0)
         {
             return Ok(notes);
         }

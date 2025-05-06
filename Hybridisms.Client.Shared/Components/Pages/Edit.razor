@@ -1,17 +1,20 @@
-﻿@page "/counter"
+﻿@page "/edit/{id:guid?}"
 @rendermode HybridRenderMode.InteractiveAuto
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Edit Note</PageTitle>
 
-<h1>Counter</h1>
+<h1>Edit Note</h1>
+
+<p><em>Render Mode: @RendererInfo.Name</em></p>
 
 <p role="status">Current count: @currentCount</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount" disabled="@(!RendererInfo.IsInteractive)">Click me</button>
 
-<p>Render Mode: @RendererInfo.Name</p>
-
 @code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
     private int currentCount = 0;
 
     private void IncrementCount()

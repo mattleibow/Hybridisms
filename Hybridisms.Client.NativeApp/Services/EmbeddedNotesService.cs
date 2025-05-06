@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Hybridisms.Client.NativeApp.Data;
 using Hybridisms.Client.Shared.Services;
 
@@ -5,7 +6,7 @@ namespace Hybridisms.Client.NativeApp.Services;
 
 public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesService
 {
-    public async Task<IList<Note>> GetNotesAsync(int count = 5, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Note> GetNotesAsync(int count = 5, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await EnsureCreatedAsync();
 
@@ -16,15 +17,12 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var notes = new List<Note>();
         foreach (var entity in entities)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            notes.Add(entity.ToNote());
+            yield return entity.ToNote();
         }
-
-        return notes;
     }
 
     public async Task SyncNotesAsync(IEnumerable<Note> notes)

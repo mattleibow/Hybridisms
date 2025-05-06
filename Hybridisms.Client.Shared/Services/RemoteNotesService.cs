@@ -1,20 +1,17 @@
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using Hybridisms.Client.Shared.Services;
 
 public class RemoteNotesService(HttpClient httpClient) : INotesService
 {
-    public async Task<IList<Note>> GetNotesAsync(int count = 5, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Note> GetNotesAsync(int count = 5, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var notes = new List<Note>();
-
-        await foreach (var note in httpClient.GetFromJsonAsAsyncEnumerable<Note>("api/notes", cancellationToken))
+        await foreach (var note in httpClient.GetFromJsonAsAsyncEnumerable<Note>("api/notes").WithCancellation(cancellationToken))
         {
             if (note is null)
                 continue;
 
-            notes.Add(note);
+            yield return note;
         }
-
-        return notes.ToArray();
     }
 }

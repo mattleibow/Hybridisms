@@ -1,9 +1,63 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+@using Hybridisms.Client.Shared.Services
+@attribute [StreamRendering]
 
-<h1>Hello, world!</h1>
+@inject INotesService NotesService
 
-Welcome to your new app.
+<PageTitle>Notes</PageTitle>
 
-<p>Render Mode: @RendererInfo.Name</p>
+<script src="@Assets["_content/Hybridisms.Server.Shared/components/notes.js"]"></script>
+
+<h1>Notes</h1>
+
+<p><em>Render Mode: @RendererInfo.Name</em></p>
+
+<p>This component demonstrates showing data.</p>
+
+@if (notes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button class="btn btn-primary" onclick="refreshNotesTable()">Refresh</button>
+
+    <table class="table" id="weatherTable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th aria-label="Temperature in Celsius">Temp. (C)</th>
+                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var note in notes)
+            {
+                <tr>
+                    <td>@note.Date.ToShortDateString()</td>
+                    <td>@note.TemperatureC</td>
+                    <td>@note.TemperatureF</td>
+                    <td>@note.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IList<Note>? notes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await foreach (var note in NotesService.GetNotesAsync())
+        {
+            notes ??= new List<Note>();
+
+            notes.Add(note);
+            
+            StateHasChanged();
+        }
+    }
+}

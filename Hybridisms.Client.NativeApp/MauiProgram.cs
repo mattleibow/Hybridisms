@@ -38,13 +38,12 @@ public static class MauiProgram
             http.AddServiceDiscovery();
         });
 
+        // Register SQLite database
         builder.Services.AddOptions<HybridismsEmbeddedDbContext.DbContextOptions>()
             .Configure(options => 
             {
                 options.DatabasePath = Path.Combine(FileSystem.AppDataDirectory, builder.Configuration.GetConnectionString("Hybridisms")!);
             });
-
-        // Register SQLite database
         builder.Services.AddSingleton<HybridismsEmbeddedDbContext>();
 
         // Register services
