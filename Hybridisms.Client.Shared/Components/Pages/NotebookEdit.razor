@@ -1,0 +1,37 @@
+@page "/notebook/{id}/edit"
+
+@using Hybridisms.Client.Shared.Services
+
+@inject INotesService NotesService
+@inject NavigationManager NavigationManager
+
+<h3>Notebook Details</h3>
+
+@if (notebook == null)
+{
+    <p>Loading notebook...</p>
+}
+else
+{
+    <div>
+        <h4>@notebook.Title</h4>
+        <p>@notebook.Description</p>
+        <!-- Add more notebook details here -->
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid id { get; set; }
+
+    private Notebook? notebook;
+
+    protected override async Task OnInitializedAsync()
+    {
+        notebook = await NotesService.GetNotebookAsync(id);
+        if (notebook == null)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}

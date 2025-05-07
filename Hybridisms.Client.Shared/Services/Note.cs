@@ -1,14 +1,32 @@
+using Markdig;
+
 namespace Hybridisms.Client.Shared.Services;
 
-public class Note
+public class Note : ModelBase
 {
-    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
 
-    public DateOnly Date { get; set; }
+    private string content = string.Empty;
+    public string Content
+    {
+        get => content;
+        set
+        {
+            if (content != value)
+            {
+                content = value;
+                htmlContent = null;
+            }
+        }
+    }
 
-    public int TemperatureC { get; set; }
+    public bool Starred { get; set; } = false;
 
-    public string? Summary { get; set; }
+    public List<Label> Labels { get; set; } = [];
 
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public Guid NotebookId { get; set; }
+
+    private string? htmlContent;
+    public string HtmlContent =>
+        htmlContent ??= Markdown.ToHtml(content ?? string.Empty);
 }

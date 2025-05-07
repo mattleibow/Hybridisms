@@ -1,0 +1,131 @@
+<div class="mb-3">
+    <label>@Label</label>
+    <div class="d-flex flex-wrap gap-1 mb-2">
+    @if (Tags?.Count > 0)
+    {
+        @foreach (var tag in Tags)
+        {
+            <span class="badge bg-primary rounded-pill d-flex align-items-center">
+                @tag
+                <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remove" @onclick="() => RemoveTag(tag)" style="font-size:0.7em;"></button>
+            </span>
+        }
+    }
+    </div>
+    <input class="form-control" placeholder="@Placeholder" @bind="newTag" @oninput="OnInputChanged" />
+    @if (filteredRecommendedTags?.Count > 0)
+    {
+        <div class="d-flex flex-wrap gap-1 mt-1 mb-2">
+            @foreach (var tag in filteredRecommendedTags)
+            {
+                <span class="badge bg-secondary rounded-pill" style="cursor:pointer;" @onclick="() => AddRecommendedTag(tag)">@tag</span>
+            }
+        </div>
+    }
+    @if (filteredSuggestions?.Count > 0)
+    {
+        <ul class="list-group position-absolute" style="z-index:1000; max-width:300px;">
+            @foreach (var tag in filteredSuggestions)
+            {
+                <li class="list-group-item list-group-item-action" style="cursor:pointer;" @onclick="() => SelectSuggestion(tag)">@tag</li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<string> Tags { get; set; } = new();
+
+    [Parameter]
+    public List<string>? AvailableTags { get; set; }
+
+    [Parameter]
+    public List<string>? RecommendedTags { get; set; }
+
+    [Parameter]
+    public EventCallback<List<string>> TagsChanged { get; set; }
+
+    [Parameter]
+    public string Label { get; set; } = "Tags";
+
+    [Parameter]
+    public string Placeholder { get; set; } = "Add tag...";
+
+    private string newTag = string.Empty;
+    private List<string> filteredSuggestions = new();
+    private List<string> filteredRecommendedTags = new();
+
+    override protected void OnParametersSet()
+    {
+        RefreshRecommendedTags();
+    }
+
+    private void OnInputChanged(ChangeEventArgs e)
+    {
+        newTag = e.Value?.ToString();
+        RefreshFilteredSuggestions();
+    }
+
+    private async Task SelectSuggestion(string suggestion)
+    {
+        newTag = string.Empty;
+        filteredSuggestions.Clear();
+        
+        await AddRecommendedTag(suggestion);
+    }
+
+    private async Task RemoveTag(string tag)
+    {
+        if (!Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+            return;
+
+        Tags.Remove(tag);
+        RefreshRecommendedTags();
+        RefreshFilteredSuggestions();
+
+        await TagsChanged.InvokeAsync(Tags);
+    }
+
+    private async Task AddRecommendedTag(string tag)
+    {
+        if (Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+            return;
+
+        Tags.Add(tag);
+        RefreshRecommendedTags();
+        RefreshFilteredSuggestions();
+
+        await TagsChanged.InvokeAsync(Tags);
+    }
+
+    private void RefreshRecommendedTags()
+    {
+        if (RecommendedTags?.Count > 0)
+        {
+            filteredRecommendedTags = RecommendedTags
+                .Where(tag => !Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+        }
+        else
+        {
+            filteredRecommendedTags.Clear();
+        }
+    }
+
+    private void RefreshFilteredSuggestions()
+    {
+        if (!string.IsNullOrWhiteSpace(newTag) && AvailableTags?.Count > 0)
+        {
+            filteredSuggestions = AvailableTags
+                .Where(tag => !Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+                .Where(tag => tag.Contains(newTag, StringComparison.OrdinalIgnoreCase))
+                .Take(5)
+                .ToList();
+        }
+        else
+        {
+            filteredSuggestions.Clear();
+        }
+    }
+}

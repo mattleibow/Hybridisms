@@ -1,17 +1,61 @@
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using Hybridisms.Client.Shared.Services;
+
+namespace Hybridisms.Client.Shared.Services;
 
 public class RemoteNotesService(HttpClient httpClient) : INotesService
 {
-    public async IAsyncEnumerable<Note> GetNotesAsync(int count = 5, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Notebook> GetNotebooksAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        await foreach (var note in httpClient.GetFromJsonAsAsyncEnumerable<Note>("api/notes").WithCancellation(cancellationToken))
+        await foreach (var notebook in httpClient.GetFromJsonAsAsyncEnumerable<Notebook>("api/notebook").WithCancellation(cancellationToken))
+        {
+            if (notebook is null)
+                continue;
+
+            yield return notebook;
+        }
+    }
+
+    public async Task<Notebook?> GetNotebookAsync(Guid notebookId, CancellationToken cancellationToken = default)
+    {
+        return await httpClient.GetFromJsonAsync<Notebook>($"api/notebook/{notebookId}", cancellationToken);
+    }
+
+    public async IAsyncEnumerable<Note> GetNotesAsync(Guid notebookId, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await foreach (var note in httpClient.GetFromJsonAsAsyncEnumerable<Note>($"api/notebook/{notebookId}/notes").WithCancellation(cancellationToken))
         {
             if (note is null)
                 continue;
 
             yield return note;
+        }
+    }
+
+    public async Task<Note?> GetNoteAsync(Guid noteId, CancellationToken cancellationToken = default)
+    {
+        return await httpClient.GetFromJsonAsync<Note>($"api/notes/{noteId}", cancellationToken);
+    }
+
+    public async IAsyncEnumerable<Note> GetStarredNotesAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await foreach (var note in httpClient.GetFromJsonAsAsyncEnumerable<Note>("api/notes/starred").WithCancellation(cancellationToken))
+        {
+            if (note is null)
+                continue;
+
+            yield return note;
+        }
+    }
+
+    public async IAsyncEnumerable<Label> GetLabelsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await foreach (var label in httpClient.GetFromJsonAsAsyncEnumerable<Label>("api/labels").WithCancellation(cancellationToken))
+        {
+            if (label is null)
+                continue;
+
+            yield return label;
         }
     }
 }

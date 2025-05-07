@@ -7,20 +7,23 @@ namespace Hybridisms.Server.WebApp.Controllers;
 [Route("api/[controller]")]
 public class NotesController(INotesService noteService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<IActionResult> GetNotes()
+    [HttpGet("starred")]
+    public async Task<IActionResult> GetStarredNotes()
     {
         var notes = new List<Note>();
-        await foreach (var note in noteService.GetNotesAsync())
+        await foreach (var note in noteService.GetStarredNotesAsync())
         {
             notes.Add(note);
         }
-        
-        if (notes.Count >= 0)
-        {
-            return Ok(notes);
-        }
+        return Ok(notes);
+    }
 
-        return NotFound("No notes available.");
+    [HttpGet("{noteId}")]
+    public async Task<IActionResult> GetNoteById(Guid noteId)
+    {
+        var note = await noteService.GetNoteAsync(noteId);
+        if (note == null)
+            return NotFound();
+        return Ok(note);
     }
 }

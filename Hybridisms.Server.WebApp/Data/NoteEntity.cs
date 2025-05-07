@@ -1,15 +1,16 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Hybridisms.Server.WebApp.Data;
 
-public class NoteEntity
+public class NoteEntity : BaseEntity
 {
-    [Key]
-    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
 
-    public DateOnly Date { get; set; }
+    public string Content { get; set; } = string.Empty;
 
-    public int TemperatureC { get; set; }
+    public ICollection<LabelEntity> Labels { get; set; } = [];
 
-    public string? Summary { get; set; }
+    public Guid NotebookId { get; set; }
+
+    public NotebookEntity Notebook { get; set; } = null!;
+
+    public bool Starred { get; set; } = false;
 }

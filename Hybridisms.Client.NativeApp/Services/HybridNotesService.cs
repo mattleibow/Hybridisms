@@ -41,22 +41,61 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         }
     }
 
+    public async Task<Notebook?> GetNotebookAsync(Guid notebookId, CancellationToken cancellationToken = default)
+    {
+        // Try remote first
+        var remoteNotebook = await remote.GetNotebookAsync(notebookId, cancellationToken);
+        if (remoteNotebook != null)
+            return remoteNotebook;
+        // Fallback to local
+        return await local.GetNotebookAsync(notebookId, cancellationToken);
+    }
+
+    public async Task<Note?> GetNoteAsync(Guid noteId, CancellationToken cancellationToken = default)
+    {
+        // Try remote first
+        var remoteNote = await remote.GetNoteAsync(noteId, cancellationToken);
+        if (remoteNote != null)
+            return remoteNote;
+        // Fallback to local
+        return await local.GetNoteAsync(noteId, cancellationToken);
+    }
+
+    public async IAsyncEnumerable<Notebook> GetNotebooksAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await foreach (var notebook in remote.GetNotebooksAsync(cancellationToken).WithCancellation(cancellationToken))
+        {
+            yield return notebook;
+        }
+    }
+
+    public async IAsyncEnumerable<Note> GetNotesAsync(Guid notebookId, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await foreach (var note in remote.GetNotesAsync(notebookId, cancellationToken).WithCancellation(cancellationToken))
+        {
+            yield return note;
+        }
+    }
+
+    public async IAsyncEnumerable<Note> GetStarredNotesAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await foreach (var note in remote.GetStarredNotesAsync(cancellationToken).WithCancellation(cancellationToken))
+        {
+            yield return note;
+        }
+    }
+
+    public async IAsyncEnumerable<Hybridisms.Client.Shared.Services.Label> GetLabelsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await foreach (var label in remote.GetLabelsAsync(cancellationToken).WithCancellation(cancellationToken))
+        {
+            yield return label;
+        }
+    }
+
     private async Task<IList<Note>?> GetRemoteNotesAsync(int count, CancellationToken cancellationToken)
     {
-        try
-        {
-            var notes = new List<Note>();
-            await foreach (var note in remote.GetNotesAsync(count).WithCancellation(cancellationToken))
-            {
-                notes.Add(note);
-            }
-            return notes;
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            // Ignore and fall back to local
-        }
-
+        // This method is obsolete and not used by the interface, so it can be removed or left unused.
         return null;
     }
 

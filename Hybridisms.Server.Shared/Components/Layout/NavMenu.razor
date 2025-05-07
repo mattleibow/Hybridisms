@@ -1,4 +1,8 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using Hybridisms.Client.Shared.Services
+
+@inject INotesService NotesService
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Hybridisms</a>
     </div>
@@ -11,22 +15,51 @@
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Notes
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Starred Notes
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="edit">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> New Nore
-            </NavLink>
-        </div>
+        <hr />
+
+        @if (notebooks is null)
+        {
+            <div class="nav-item px-3">
+                <span class="nav-link disabled">Loading notebooks...</span>
+            </div>
+        }
+        else
+        {
+            @foreach (var notebook in notebooks)
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href=@($"notebook/{notebook.Id}/notes")>
+                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> @notebook.Title
+                    </NavLink>
+                </div>
+            }
+        }
+
+        <hr />
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="deviceinfo">
-                <span class="bi bi-music-player-fill-nav-menu" aria-hidden="true"></span> Device Info
+            <NavLink class="nav-link" href="/notebook/new" Match="NavLinkMatch.All">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> New Notebook
             </NavLink>
         </div>
 
     </nav>
 </div>
 
+@code {
+    private List<Notebook>? notebooks;
+
+    protected override async Task OnInitializedAsync()
+    {
+        notebooks = new List<Notebook>();
+        await foreach (var notebook in NotesService.GetNotebooksAsync())
+        {
+            notebooks.Add(notebook);
+            StateHasChanged();
+        }
+    }
+}

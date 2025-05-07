@@ -1,0 +1,86 @@
+@page "/notebook/{id}/notes"
+@attribute [StreamRendering]
+
+@using Hybridisms.Client.Shared.Services
+
+@inject INotesService NotesService
+@inject NavigationManager NavigationManager
+
+<PageTitle>@notebookTitle</PageTitle>
+
+<h1>@notebookTitle</h1>
+
+@if (notebookNotFound)
+{
+    <p class="text-danger">No notebook was found for the given ID.</p>
+}
+else if (notes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (notes.Count == 0)
+{
+    <p>No notes found.</p>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var note in notes)
+        {
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="note-card card h-100 mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">@note.Title</h5>
+                            <a class="btn btn-primary btn-sm ms-2" href="/note/@note.Id/edit">Edit</a>
+                        </div>
+                        <p class="card-text">
+                            @((MarkupString)note.HtmlContent)
+                        </p>
+                        @if (note.Labels?.Count > 0)
+                        {
+                            <div class="mb-2">
+                                @foreach (var label in note.Labels)
+                                {
+                                    <span class="badge me-1" style="background-color:@label.Color;color:white;">@label.Name</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string? id { get; set; }
+
+    private Notebook? notebook;
+    private string? notebookTitle = "Notes";
+    private List<Note>? notes;
+    private bool notebookNotFound;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(id) && Guid.TryParse(id, out var notebookId))
+            notebook = await NotesService.GetNotebookAsync(notebookId);
+
+        if (notebook is null)
+        {
+            notebookNotFound = true;
+            return;
+        }
+
+        notebookTitle = notebook.Title;
+        StateHasChanged();
+
+        notes = new List<Note>();
+        await foreach (var note in NotesService.GetNotesAsync(notebook.Id))
+        {
+            notes.Add(note);
+            StateHasChanged();
+        }
+    }
+}
