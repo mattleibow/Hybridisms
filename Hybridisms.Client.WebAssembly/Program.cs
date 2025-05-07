@@ -12,6 +12,7 @@ builder.Services.ConfigureHttpClientDefaults(http =>
 
 // The Blazor WASM client only supports the remote HTTP service
 builder.Services.AddHttpClient<INotesService, RemoteNotesService>(static client => client.BaseAddress = new("https+http://api/"));
+builder.Services.AddHttpClient<ILabelRecommendationService, RemoteLabelRecommendationService>(static client => client.BaseAddress = new("https+http://api/"));
 
 var app = builder.Build();
 

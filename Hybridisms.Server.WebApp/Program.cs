@@ -19,10 +19,12 @@ builder.Services.AddDbContext<HybridismsDbContext>(options =>
 builder.Services.AddControllers();
 
 // Register label recommendation service
-builder.Services.AddScoped<ILabelRecommendationService, DbLabelRecommendationService>();
+builder.Services.AddScoped<DbLabelRecommendationService>();
+builder.Services.AddScoped<ILabelRecommendationService, DbLabelRecommendationService>(svc => svc.GetRequiredService<DbLabelRecommendationService>());
 
 // The Blazor server app only supports the local database service
-builder.Services.AddScoped<INotesService, DbNotesService>();
+builder.Services.AddScoped<DbNotesService>();
+builder.Services.AddScoped<INotesService, DbNotesService>(svc => svc.GetRequiredService<DbNotesService>());
 
 // Turn on service discovery by default
 builder.Services.AddServiceDiscovery();

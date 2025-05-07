@@ -1,35 +1,21 @@
-using Hybridisms.Client.Shared.Services;
 using SQLite;
 
 namespace Hybridisms.Client.NativeApp.Data;
 
 [Table("Notes")]
-public class NoteEntity
+public class NoteEntity : BaseEntity
 {
-    [PrimaryKey]
-    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
 
-    public string? Date { get; set; }
+    public string Content { get; set; } = string.Empty;
 
-    public int TemperatureC { get; set; }
+    public bool Starred { get; set; } = false;
 
-    public string? Summary { get; set; }
+    public Guid NotebookId { get; set; }
 
-    public Note ToNote() =>
-        new()
-        {
-            Id = Id,
-            Date = DateOnly.Parse(Date ?? string.Empty),
-            TemperatureC = TemperatureC,
-            Summary = Summary
-        };
+    [Ignore]
+    public NotebookEntity? Notebook { get; set; }
 
-    public static NoteEntity FromNote(Note note) =>
-        new()
-        {
-            Id = note.Id,
-            Date = note.Date.ToString("yyyy-MM-dd"),
-            TemperatureC = note.TemperatureC,
-            Summary = note.Summary
-        };
+    [Ignore]
+    public List<LabelEntity>? Labels { get; set; }
 }

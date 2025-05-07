@@ -30,7 +30,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         // If some error occurs, fall back to local service
 
         // Make sure to seed the local database if it doesn't exist
-        await CopyFromRawResourcesAsync(cancellationToken);
+        // await CopyFromRawResourcesAsync(cancellationToken);
 
         // Then get notes from local service
         await foreach (var note in local.GetNotesAsync(count).WithCancellation(cancellationToken))

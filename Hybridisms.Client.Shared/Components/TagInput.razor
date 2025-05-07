@@ -63,7 +63,7 @@
 
     private void OnInputChanged(ChangeEventArgs e)
     {
-        newTag = e.Value?.ToString();
+        newTag = e.Value?.ToString() ?? "";
         RefreshFilteredSuggestions();
     }
 

@@ -14,9 +14,18 @@ public class HybridismsEmbeddedDbContext(IOptions<HybridismsEmbeddedDbContext.Db
 
     public DbSet<NoteEntity> Notes => new(Connection);
 
+    public DbSet<LabelEntity> Labels => new(Connection);
+
+    public DbSet<NotebookEntity> Notebooks => new(Connection);
+
+    public DbSet<NoteLabelEntity> NoteLabels => new(Connection);
+
     public async Task EnsureCreatedAsync()
     {
         await Connection.CreateTableAsync<NoteEntity>();
+        await Connection.CreateTableAsync<LabelEntity>();
+        await Connection.CreateTableAsync<NotebookEntity>();
+        await Connection.CreateTableAsync<NoteLabelEntity>();
     }
 
     public class DbSet<T>(SQLiteAsyncConnection connection) : AsyncTableQuery<T>(connection.GetConnection().Table<T>())

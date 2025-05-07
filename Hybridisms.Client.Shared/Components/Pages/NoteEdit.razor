@@ -48,6 +48,7 @@ else
     private List<string> availableTags = [];
     private List<Label> availableLabelObjects = [];
     private List<string> recommendedTags = [];
+    private CancellationTokenSource? debounceCts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,16 +101,39 @@ else
 
     private async Task OnNoteChanged(ChangeEventArgs e)
     {
-        await RefreshSuggestions();
+        debounceCts?.Cancel();
+        debounceCts = new CancellationTokenSource();
+        
+        var token = debounceCts.Token;
+        try
+        {
+            await Task.Delay(500, token); // 500ms debounce
+            if (!token.IsCancellationRequested)
+            {
+                await RefreshSuggestions();
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // Ignore, another input occurred
+        }
     }
 
     private async Task RefreshSuggestions()
     {
         Console.WriteLine($"Refreshing suggestions for note: {note?.Title} {note?.Content}....");
 
-        var randomLabels = await LabelRecommendationService.GetRecommendedLabelsAsync(newContent, availableTags, 3);
+        if (string.IsNullOrWhiteSpace(note?.Title) || string.IsNullOrWhiteSpace(note?.Content))
+            return;
 
-        recommendedTags = randomLabels;
+        recommendedTags = new List<string>();
+        await foreach (var label in LabelRecommendationService.RecommendLabelsAsync(note, 3))
+        {
+            if (label?.Name is not string name || string.IsNullOrWhiteSpace(name))
+                continue;
+
+            recommendedTags.Add(name);
+        }
 
         Console.WriteLine($"Recommended tags: {string.Join(", ", recommendedTags)}");
     }
