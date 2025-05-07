@@ -48,14 +48,14 @@ public class RemoteNotesService(HttpClient httpClient) : INotesService
         }
     }
 
-    public async IAsyncEnumerable<Label> GetLabelsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Topic> GetTopicsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        await foreach (var label in httpClient.GetFromJsonAsAsyncEnumerable<Label>("api/labels").WithCancellation(cancellationToken))
+        await foreach (var topic in httpClient.GetFromJsonAsAsyncEnumerable<Topic>("api/topics").WithCancellation(cancellationToken))
         {
-            if (label is null)
+            if (topic is null)
                 continue;
 
-            yield return label;
+            yield return topic;
         }
     }
 }

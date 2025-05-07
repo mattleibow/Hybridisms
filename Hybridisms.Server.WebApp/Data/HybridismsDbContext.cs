@@ -6,7 +6,7 @@ public class HybridismsDbContext(DbContextOptions<HybridismsDbContext> options) 
 {
     public DbSet<NoteEntity> Notes => Set<NoteEntity>();
 
-    public DbSet<LabelEntity> Labels => Set<LabelEntity>();
+    public DbSet<TopicEntity> Topics => Set<TopicEntity>();
 
     public DbSet<NotebookEntity> Notebooks => Set<NotebookEntity>();
 
@@ -15,13 +15,13 @@ public class HybridismsDbContext(DbContextOptions<HybridismsDbContext> options) 
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<NoteEntity>().ToTable("Notes");
-        modelBuilder.Entity<LabelEntity>().ToTable("Labels");
+        modelBuilder.Entity<TopicEntity>().ToTable("Topics");
         modelBuilder.Entity<NotebookEntity>().ToTable("Notebooks");
 
         modelBuilder.Entity<NoteEntity>()
-            .HasMany(n => n.Labels)
-            .WithMany(l => l.Notes)
-            .UsingEntity(j => j.ToTable("NoteLabels"));
+            .HasMany(n => n.Topics)
+            .WithMany(t => t.Notes)
+            .UsingEntity(j => j.ToTable("NoteTopics"));
 
         modelBuilder.Entity<NotebookEntity>()
             .HasMany(nb => nb.Notes)
@@ -36,32 +36,32 @@ public class HybridismsDbContext(DbContextOptions<HybridismsDbContext> options) 
         if (await Notebooks.AnyAsync())
             return;
 
-        // Create labels with cool colors
-        var foodLabel = new LabelEntity
+        // Create topics with cool colors
+        var foodTopic = new TopicEntity
         {
             Id = Guid.NewGuid(),
             Name = "Food",
             Color = "#FF7043" // Deep Orange
         };
-        var presentationsLabel = new LabelEntity
+        var presentationsTopic = new TopicEntity
         {
             Id = Guid.NewGuid(),
             Name = "Presentations",
             Color = "#42A5F5" // Blue
         };
-        var jokesLabel = new LabelEntity
+        var jokesTopic = new TopicEntity
         {
             Id = Guid.NewGuid(),
             Name = "Jokes",
             Color = "#FFD600" // Yellow
         };
-        var userGroupsLabel = new LabelEntity
+        var userGroupsTopic = new TopicEntity
         {
             Id = Guid.NewGuid(),
             Name = "User Groups",
             Color = "#66BB6A" // Green
         };
-        var shoppingLabel = new LabelEntity
+        var shoppingTopic = new TopicEntity
         {
             Id = Guid.NewGuid(),
             Name = "Shopping",
@@ -88,7 +88,7 @@ public class HybridismsDbContext(DbContextOptions<HybridismsDbContext> options) 
                         - Coffee
                         - Pizza
                         """,
-                    Labels = [foodLabel, shoppingLabel]
+                    Topics = [foodTopic, shoppingTopic]
                 },
                 new NoteEntity
                 {
@@ -101,7 +101,7 @@ public class HybridismsDbContext(DbContextOptions<HybridismsDbContext> options) 
                         - Mayonnaise
                         - Coke
                         """,
-                    Labels = [foodLabel]
+                    Topics = [foodTopic]
                 }
             ]
         };
@@ -117,14 +117,14 @@ public class HybridismsDbContext(DbContextOptions<HybridismsDbContext> options) 
                     Id = Guid.NewGuid(),
                     Title = "Prepare slides",
                     Content = "Create slides for the CPTMSDUG presentation.",
-                    Labels = [presentationsLabel, userGroupsLabel]
+                    Topics = [presentationsTopic, userGroupsTopic]
                 },
                 new NoteEntity
                 {
                     Id = Guid.NewGuid(),
                     Title = "Prepare demo",
                     Content = "Build and test the demo for the user group.",
-                    Labels = [presentationsLabel, userGroupsLabel]
+                    Topics = [presentationsTopic, userGroupsTopic]
                 },
                 new NoteEntity
                 {
@@ -140,17 +140,17 @@ public class HybridismsDbContext(DbContextOptions<HybridismsDbContext> options) 
                         4. Why do Java developers wear glasses? Because they don't see sharp.
                         5. Debugging: Being the detective in a crime movie where you are also the murderer.
                         """,
-                    Labels = [jokesLabel, presentationsLabel, userGroupsLabel]
+                    Topics = [jokesTopic, presentationsTopic, userGroupsTopic]
                 }
             ]
         };
 
-        await Labels.AddRangeAsync(
-            foodLabel,
-            presentationsLabel,
-            jokesLabel,
-            userGroupsLabel,
-            shoppingLabel);
+        await Topics.AddRangeAsync(
+            foodTopic,
+            presentationsTopic,
+            jokesTopic,
+            userGroupsTopic,
+            shoppingTopic);
 
         await Notebooks.AddRangeAsync(
             shoppingNotebook,

@@ -2,12 +2,12 @@ using SQLite;
 
 namespace Hybridisms.Client.NativeApp.Data;
 
-[Table("NoteLabels")]
-public class NoteLabelEntity
+[Table("NoteTopics")]
+public class NoteTopicEntity
 {
     [PrimaryKey]
     public Guid NoteId { get; set; }
 
     [PrimaryKey]
-    public Guid LabelId { get; set; }
+    public Guid TopicId { get; set; }
 }

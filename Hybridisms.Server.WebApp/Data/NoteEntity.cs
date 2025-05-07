@@ -6,7 +6,7 @@ public class NoteEntity : BaseEntity
 
     public string Content { get; set; } = string.Empty;
 
-    public ICollection<LabelEntity> Labels { get; set; } = [];
+    public ICollection<TopicEntity> Topics { get; set; } = [];
 
     public Guid NotebookId { get; set; }
 

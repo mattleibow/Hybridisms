@@ -4,17 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 namespace Hybridisms.Server.WebApp.Controllers;
 
 [ApiController]
-[Route("api/recommendation")]
-public class RecommendationController(ILabelRecommendationService labelRecommendations) : ControllerBase
+[Route("api/[controller]")]
+public class RecommendationController(ITopicRecommendationService topicRecommendations) : ControllerBase
 {
-    [HttpPost("labels")]
-    public async Task<ActionResult> RecommendLabels([FromQuery] int count, [FromBody] Note note)
+    [HttpPost("topics")]
+    public async Task<ActionResult> RecommendTopics([FromQuery] int count, [FromBody] Note note)
     {
-        var labels = new List<Label>();
-        await foreach (var label in labelRecommendations.RecommendLabelsAsync(note, count))
+        var topics = new List<Topic>();
+        await foreach (var topic in topicRecommendations.RecommendTopicsAsync(note, count))
         {
-            labels.Add(label);
+            topics.Add(topic);
         }
-        return Ok(labels);
+        return Ok(topics);
     }
 }

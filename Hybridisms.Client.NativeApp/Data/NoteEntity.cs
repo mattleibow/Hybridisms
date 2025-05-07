@@ -17,5 +17,5 @@ public class NoteEntity : BaseEntity
     public NotebookEntity? Notebook { get; set; }
 
     [Ignore]
-    public List<LabelEntity>? Labels { get; set; }
+    public List<TopicEntity>? Topics { get; set; }
 }

@@ -5,7 +5,7 @@
 @using Hybridisms.Client.Shared.Components
 
 @inject INotesService NotesService
-@inject ILabelRecommendationService LabelRecommendationService
+@inject ITopicRecommendationService TopicRecommendationService
 @inject NavigationManager NavigationManager
 
 <h3>Edit Note</h3>
@@ -31,7 +31,7 @@ else
             <label for="content" class="form-label">Content</label>
             <InputTextArea id="content" class="form-control" @bind-Value="note.Content" @oninput="OnNoteChanged" />
         </div>
-        <TagInput Tags="tagNames" AvailableTags="availableTags" TagsChanged="OnTagsChanged" Label="Labels" Placeholder="Add labels..." RecommendedTags="recommendedTags" />
+        <TagInput Tags="tagNames" AvailableTags="availableTags" TagsChanged="OnTagsChanged" Label="Topics" Placeholder="Add topics..." RecommendedTags="recommendedTags" />
         <button type="submit" class="btn btn-success">Save</button>
         <button type="button" class="btn btn-secondary ms-2" @onclick="GoBack">Cancel</button>
     </EditForm>
@@ -46,7 +46,7 @@ else
 
     private List<string> tagNames = [];
     private List<string> availableTags = [];
-    private List<Label> availableLabelObjects = [];
+    private List<Topic> availableTopicObjects = [];
     private List<string> recommendedTags = [];
     private CancellationTokenSource? debounceCts;
 
@@ -61,16 +61,16 @@ else
             return;
         }
 
-        tagNames = note.Labels.Select(l => l.Name).ToList();
+        tagNames = note.Topics.Select(t => t.Name).ToList();
 
         // Load available tags
-        await foreach (var label in NotesService.GetLabelsAsync())
+        await foreach (var topic in NotesService.GetTopicsAsync())
         {
-            if (string.IsNullOrWhiteSpace(label.Name))
+            if (string.IsNullOrWhiteSpace(topic.Name))
                 continue;
 
-            availableTags.Add(label.Name);
-            availableLabelObjects.Add(label);
+            availableTags.Add(topic.Name);
+            availableTopicObjects.Add(topic);
         }
     }
 
@@ -87,8 +87,8 @@ else
     {
         if (note != null)
         {
-            note.Labels = tags
-                .Select(t => availableLabelObjects.FirstOrDefault(l => l.Name == t) ?? new Label { Name = t })
+            note.Topics = tags
+                .Select(t => availableTopicObjects.FirstOrDefault(tp => tp.Name == t) ?? new Topic { Name = t })
                 .ToList();
         }
         return Task.CompletedTask;
@@ -127,9 +127,9 @@ else
             return;
 
         recommendedTags = new List<string>();
-        await foreach (var label in LabelRecommendationService.RecommendLabelsAsync(note, 3))
+        await foreach (var topic in TopicRecommendationService.RecommendTopicsAsync(note, 3))
         {
-            if (label?.Name is not string name || string.IsNullOrWhiteSpace(name))
+            if (topic?.Name is not string name || string.IsNullOrWhiteSpace(name))
                 continue;
 
             recommendedTags.Add(name);

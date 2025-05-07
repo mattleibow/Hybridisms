@@ -37,12 +37,12 @@ else
                         <p class="card-text">
                             @((MarkupString)note.HtmlContent)
                         </p>
-                        @if (note.Labels?.Count > 0)
+                        @if (note.Topics?.Count > 0)
                         {
                             <div class="mb-2">
-                                @foreach (var label in note.Labels)
+                                @foreach (var topic in note.Topics)
                                 {
-                                    <span class="badge me-1" style="background-color:@label.Color;color:white;">@label.Name</span>
+                                    <span class="badge me-1" style="background-color:@topic.Color;color:white;">@topic.Name</span>
                                 }
                             </div>
                         }

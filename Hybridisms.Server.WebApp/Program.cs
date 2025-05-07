@@ -18,9 +18,9 @@ builder.Services.AddDbContext<HybridismsDbContext>(options =>
 // Add controller services
 builder.Services.AddControllers();
 
-// Register label recommendation service
-builder.Services.AddScoped<DbLabelRecommendationService>();
-builder.Services.AddScoped<ILabelRecommendationService, DbLabelRecommendationService>(svc => svc.GetRequiredService<DbLabelRecommendationService>());
+// Register topic recommendation service
+builder.Services.AddScoped<DbTopicRecommendationService>();
+builder.Services.AddScoped<ITopicRecommendationService, DbTopicRecommendationService>(svc => svc.GetRequiredService<DbTopicRecommendationService>());
 
 // The Blazor server app only supports the local database service
 builder.Services.AddScoped<DbNotesService>();

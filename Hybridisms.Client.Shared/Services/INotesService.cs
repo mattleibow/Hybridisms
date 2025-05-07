@@ -10,7 +10,7 @@ public interface INotesService
 
     IAsyncEnumerable<Note> GetStarredNotesAsync(CancellationToken cancellationToken = default);
 
-    IAsyncEnumerable<Label> GetLabelsAsync(CancellationToken cancellationToken = default);
+    IAsyncEnumerable<Topic> GetTopicsAsync(CancellationToken cancellationToken = default);
 
     Task<Note?> GetNoteAsync(Guid noteId, CancellationToken cancellationToken = default);
 }

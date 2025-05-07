@@ -1,6 +1,6 @@
 namespace Hybridisms.Client.Shared.Services;
 
-public class Label : ModelBase
+public class Topic : ModelBase
 {
     public string Name { get; set; } = string.Empty;
 

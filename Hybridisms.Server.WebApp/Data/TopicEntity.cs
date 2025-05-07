@@ -1,6 +1,6 @@
 namespace Hybridisms.Server.WebApp.Data;
 
-public class LabelEntity : BaseEntity
+public class TopicEntity : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
 

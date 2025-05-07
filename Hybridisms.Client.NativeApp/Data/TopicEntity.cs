@@ -2,8 +2,8 @@ using SQLite;
 
 namespace Hybridisms.Client.NativeApp.Data;
 
-[Table("Labels")]
-public class LabelEntity : BaseEntity
+[Table("Topics")]
+public class TopicEntity : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
 

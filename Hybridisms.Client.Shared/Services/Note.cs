@@ -22,7 +22,7 @@ public class Note : ModelBase
 
     public bool Starred { get; set; } = false;
 
-    public List<Label> Labels { get; set; } = [];
+    public List<Topic> Topics { get; set; } = [];
 
     public Guid NotebookId { get; set; }
 

@@ -47,20 +47,20 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
         }
     }
 
-    public async IAsyncEnumerable<Label> GetLabelsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Topic> GetTopicsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await EnsureCreatedAsync();
-        var labels = await db.Labels.ToListAsync();
-        foreach (var label in labels)
+        var topics = await db.Topics.ToListAsync();
+        foreach (var topic in topics)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            yield return new Label
+            yield return new Topic
             {
-                Id = label.Id,
-                Name = label.Name,
-                Color = label.Color,
-                Created = label.Created,
-                Modified = label.Modified
+                Id = topic.Id,
+                Name = topic.Name,
+                Color = topic.Color,
+                Created = topic.Created,
+                Modified = topic.Modified
             };
         }
     }
@@ -93,16 +93,16 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
 
     private async Task<Note> ToNoteAsync(NoteEntity entity, CancellationToken cancellationToken)
     {
-        var noteLabelEntities = await db.NoteLabels.Where(nl => nl.NoteId == entity.Id).ToListAsync();
-        var labelIds = noteLabelEntities.Select(nl => nl.LabelId).ToList();
-        var labelEntities = await db.Labels.Where(l => labelIds.Contains(l.Id)).ToListAsync();
-        var labels = labelEntities.Select(l => new Label
+        var noteTopicEntities = await db.NoteTopics.Where(nt => nt.NoteId == entity.Id).ToListAsync();
+        var topicIds = noteTopicEntities.Select(nt => nt.TopicId).ToList();
+        var topicEntities = await db.Topics.Where(t => topicIds.Contains(t.Id)).ToListAsync();
+        var topics = topicEntities.Select(t => new Topic
         {
-            Id = l.Id,
-            Name = l.Name,
-            Color = l.Color,
-            Created = l.Created,
-            Modified = l.Modified
+            Id = t.Id,
+            Name = t.Name,
+            Color = t.Color,
+            Created = t.Created,
+            Modified = t.Modified
         }).ToList();
         return new Note
         {
@@ -113,7 +113,7 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
             NotebookId = entity.NotebookId,
             Created = entity.Created,
             Modified = entity.Modified,
-            Labels = labels
+            Topics = topics
         };
     }
 

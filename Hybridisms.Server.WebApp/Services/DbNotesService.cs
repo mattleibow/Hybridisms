@@ -34,7 +34,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
     {
         var notes = await db.Notes
             .Where(n => n.NotebookId == notebookId)
-            .Include(n => n.Labels)
+            .Include(n => n.Topics)
             .ToListAsync(cancellationToken);
 
         foreach (var note in notes)
@@ -47,7 +47,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
     public async Task<Note?> GetNoteAsync(Guid noteId, CancellationToken cancellationToken = default)
     {
         var entity = await db.Notes
-            .Include(n => n.Labels)
+            .Include(n => n.Topics)
             .FirstOrDefaultAsync(n => n.Id == noteId, cancellationToken);
 
         if (entity is null)
@@ -60,7 +60,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
     {
         var notes = await db.Notes
             .Where(n => n.Starred)
-            .Include(n => n.Labels)
+            .Include(n => n.Topics)
             .ToListAsync(cancellationToken);
 
         foreach (var note in notes)
@@ -70,16 +70,16 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         }
     }
 
-    public async IAsyncEnumerable<Label> GetLabelsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Topic> GetTopicsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var labels = await db.Labels
+        var topics = await db.Topics
             .ToListAsync(cancellationToken);
 
-        foreach (var label in labels)
+        foreach (var topic in topics)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            yield return MapLabel(label);
+            yield return MapTopic(topic);
         }
     }
 
@@ -102,12 +102,12 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
             Title = note.Title,
             Content = note.Content,
             Starred = note.Starred,
-            Labels = note.Labels.Select(MapLabel).ToList(),
+            Topics = note.Topics.Select(MapTopic).ToList(),
             NotebookId = note.NotebookId,
         };
 
-    private static Label MapLabel(LabelEntity entity) =>
-        new Label
+    private static Topic MapTopic(TopicEntity entity) =>
+        new Topic
         {
             Id = entity.Id,
             Created = entity.Created,

@@ -85,11 +85,11 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         }
     }
 
-    public async IAsyncEnumerable<Hybridisms.Client.Shared.Services.Label> GetLabelsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Topic> GetTopicsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        await foreach (var label in remote.GetLabelsAsync(cancellationToken).WithCancellation(cancellationToken))
+        await foreach (var topic in remote.GetTopicsAsync(cancellationToken).WithCancellation(cancellationToken))
         {
-            yield return label;
+            yield return topic;
         }
     }
 
