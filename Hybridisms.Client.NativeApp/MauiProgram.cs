@@ -1,6 +1,7 @@
 ﻿using Hybridisms.Client.Shared.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 using Hybridisms.Client.NativeApp.Services;
 using Hybridisms.Client.NativeApp.Data;
 
@@ -13,6 +14,12 @@ public static class MauiProgram
         AppContext.SetSwitch("Hybridisms.SupportsRenderMode", false);
 
         var builder = MauiApp.CreateBuilder();
+
+        builder.AddServiceDefaults();
+
+#if DEBUG
+        builder.Configuration.AddAspireApp(AspireAppSettings.Settings, "exciting-tunnel");
+#endif
 
         // TODO: Add a better way to set these values
         builder.Configuration.AddInMemoryCollection(

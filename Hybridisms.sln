@@ -15,7 +15,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Client.NativeApp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.AppHost", "Hybridisms.AppHost\Hybridisms.AppHost.csproj", "{045B1FC6-FB45-4CFE-9BD0-EE70EC2C1B6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.ServiceDefaults", "Hybridisms.ServiceDefaults\Hybridisms.ServiceDefaults.csproj", "{065A12A8-FEB9-0EB7-6B5B-218F280C5AC2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Server.Web.ServiceDefaults", "Hybridisms.Server.Web.ServiceDefaults\Hybridisms.Server.Web.ServiceDefaults.csproj", "{065A12A8-FEB9-0EB7-6B5B-218F280C5AC2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Client.Native.ServiceDefaults", "Hybridisms.Client.Native.ServiceDefaults\Hybridisms.Client.Native.ServiceDefaults.csproj", "{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,6 +113,18 @@ Global
 		{065A12A8-FEB9-0EB7-6B5B-218F280C5AC2}.Release|x64.Build.0 = Release|Any CPU
 		{065A12A8-FEB9-0EB7-6B5B-218F280C5AC2}.Release|x86.ActiveCfg = Release|Any CPU
 		{065A12A8-FEB9-0EB7-6B5B-218F280C5AC2}.Release|x86.Build.0 = Release|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Debug|x64.Build.0 = Debug|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Debug|x86.Build.0 = Debug|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Release|x64.ActiveCfg = Release|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Release|x64.Build.0 = Release|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Release|x86.ActiveCfg = Release|Any CPU
+		{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

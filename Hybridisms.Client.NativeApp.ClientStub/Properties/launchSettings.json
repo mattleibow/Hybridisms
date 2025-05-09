@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Hybridisms.Client.NativeApp.ClientStub": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

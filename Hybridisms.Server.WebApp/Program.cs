@@ -1,8 +1,9 @@
 using Hybridisms.Client.Shared.Services;
-using Hybridisms.Server.WebApp.Services;
-using Hybridisms.Server.WebApp.Data;
-using Microsoft.EntityFrameworkCore;
 using Hybridisms.Server.WebApp.Components;
+using Hybridisms.Server.WebApp.Data;
+using Hybridisms.Server.WebApp.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,11 +23,16 @@ builder.Services.AddControllers();
 
 // Register topic recommendation service
 builder.Services.AddScoped<DbTopicRecommendationService>();
-builder.Services.AddScoped<ITopicRecommendationService, DbTopicRecommendationService>(svc => svc.GetRequiredService<DbTopicRecommendationService>());
+builder.Services.AddScoped<ITopicRecommendationService, DbTopicRecommendationService>(static svc =>
+    svc.GetRequiredService<DbTopicRecommendationService>());
 
 // The Blazor server app only supports the local database service
 builder.Services.AddScoped<DbNotesService>();
-builder.Services.AddScoped<INotesService, DbNotesService>(svc => svc.GetRequiredService<DbNotesService>());
+builder.Services.AddScoped<INotesService, DbNotesService>(static svc =>
+    svc.GetRequiredService<DbNotesService>());
+
+builder.AddAzureOpenAIClient("ai")
+    .AddChatClient("ai-model");
 
 var app = builder.Build();
 
@@ -52,7 +58,6 @@ else
 }
 
 app.UseHttpsRedirection();
-
 
 app.UseAntiforgery();
 
