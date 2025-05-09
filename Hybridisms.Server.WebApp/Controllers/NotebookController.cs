@@ -37,4 +37,15 @@ public class NotebookController(INotesService noteService) : ControllerBase
         }
         return Ok(notes);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> SaveNotebooks([FromBody] IEnumerable<Notebook> notebooks)
+    {
+        var savedNotebooks = new List<Notebook>();
+        await foreach (var notebook in noteService.SaveNotebooksAsync(notebooks))
+        {
+            savedNotebooks.Add(notebook);
+        }
+        return Ok(savedNotebooks);
+    }
 }

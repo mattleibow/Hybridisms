@@ -4,7 +4,19 @@ namespace Hybridisms.Client.Shared.Services;
 
 public class Note : ModelBase
 {
-    public string Title { get; set; } = string.Empty;
+    private string title = string.Empty;
+    public string Title
+    {
+        get => title;
+        set
+        {
+            if (title != value)
+            {
+                title = value;
+                Modified = DateTime.UtcNow;
+            }
+        }
+    }
 
     private string content = string.Empty;
     public string Content
@@ -16,13 +28,38 @@ public class Note : ModelBase
             {
                 content = value;
                 htmlContent = null;
+                Modified = DateTime.UtcNow;
             }
         }
     }
 
-    public bool Starred { get; set; } = false;
+    private bool starred = false;
+    public bool Starred
+    {
+        get => starred;
+        set
+        {
+            if (starred != value)
+            {
+                starred = value;
+                Modified = DateTime.UtcNow;
+            }
+        }
+    }
 
-    public List<Topic> Topics { get; set; } = [];
+    private IReadOnlyList<Topic> topics = [];
+    public IReadOnlyList<Topic> Topics
+    {
+        get => topics;
+        set
+        {
+            if (!ReferenceEquals(topics, value))
+            {
+                topics = value;
+                Modified = DateTime.UtcNow;
+            }
+        }
+    }
 
     public Guid NotebookId { get; set; }
 

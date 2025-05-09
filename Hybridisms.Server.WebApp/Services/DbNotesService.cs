@@ -27,7 +27,54 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         if (entity is null)
             return null;
 
-        return (Notebook?)MapNotebook(entity);
+        return MapNotebook(entity);
+    }
+
+    public async IAsyncEnumerable<Notebook> SaveNotebooksAsync(IEnumerable<Notebook> notebooks, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var savedNotebooks = new List<Notebook>();
+        foreach (var notebook in notebooks)
+        {
+            var updatedNotebook = await SaveNotebookAsync(notebook, cancellationToken);
+            savedNotebooks.Add(updatedNotebook);
+        }
+        foreach (var savedNotebook in savedNotebooks)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return savedNotebook;
+        }
+    }
+
+    private async Task<Notebook> SaveNotebookAsync(Notebook notebook, CancellationToken cancellationToken)
+    {
+        var entity = await db.Notebooks.FirstOrDefaultAsync(n => n.Id == notebook.Id, cancellationToken);
+        if (entity is null)
+        {
+            // If the notebook does not exist, create a new one
+            // and save it to the database
+
+            entity = MapNotebook(notebook);
+            db.Notebooks.Add(entity);
+
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        else if (notebook.Modified > entity.Modified)
+        {
+            // If the incoming notebook is newer, update the entity
+            // and save it to the database
+
+            MapNotebook(notebook, entity);
+
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        else
+        {
+            // If the incoming notebook is older or the same age, do nothing
+        }
+
+        // return the updated or newly created notebook
+        notebook = MapNotebook(entity);
+        return notebook;
     }
 
     public async IAsyncEnumerable<Note> GetNotesAsync(Guid notebookId, [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -83,36 +130,120 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         }
     }
 
+    public async IAsyncEnumerable<Note> SaveNotesAsync(IEnumerable<Note> notes, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var savedNotes = new List<Note>();
+        foreach (var note in notes)
+        {
+            var updatedNote = await SaveNoteAsync(note, cancellationToken);
+            savedNotes.Add(updatedNote);
+        }
+        foreach (var savedNote in savedNotes)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return savedNote;
+        }
+    }
+
+    private async Task<Note> SaveNoteAsync(Note note, CancellationToken cancellationToken)
+    {
+        var entity = await db.Notes.Include(n => n.Topics).FirstOrDefaultAsync(n => n.Id == note.Id, cancellationToken);
+        if (entity is null)
+        {
+            // If the note does not exist, create a new one
+            entity = MapNote(note);
+            db.Notes.Add(entity);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        else if (note.Modified > entity.Modified)
+        {
+            // If the incoming note is newer, update the entity
+            MapNote(note, entity);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        // else: If the incoming note is older or the same age, do nothing
+
+        // return the updated or newly created note
+        note = MapNote(entity);
+        return note;
+    }
+
     private static Notebook MapNotebook(NotebookEntity entity) =>
         new Notebook
         {
             Id = entity.Id,
-            Created = entity.Created,
-            Modified = entity.Modified,
             Title = entity.Title,
             Description = entity.Description,
+            Created = entity.Created,
+            Modified = entity.Modified,
         };
 
     private static Note MapNote(NoteEntity note) =>
         new Note
         {
             Id = note.Id,
-            Created = note.Created,
-            Modified = note.Modified,
             Title = note.Title,
             Content = note.Content,
             Starred = note.Starred,
             Topics = note.Topics.Select(MapTopic).ToList(),
             NotebookId = note.NotebookId,
+            Created = note.Created,
+            Modified = note.Modified,
         };
 
     private static Topic MapTopic(TopicEntity entity) =>
         new Topic
         {
             Id = entity.Id,
-            Created = entity.Created,
-            Modified = entity.Modified,
             Name = entity.Name,
             Color = entity.Color,
+            Created = entity.Created,
+            Modified = entity.Modified,
         };
+
+    private static NotebookEntity MapNotebook(Notebook model, NotebookEntity? entity = null)
+    {
+        entity ??= new NotebookEntity();
+        entity.Id = model.Id;
+        entity.Title = model.Title;
+        entity.Description = model.Description;
+        entity.Created = model.Created;
+        entity.Modified = model.Modified;
+        return entity;
+    }
+
+    private NoteEntity MapNote(Note model, NoteEntity? entity = null)
+    {
+        entity ??= new NoteEntity();
+        entity.Id = model.Id;
+        entity.Title = model.Title;
+        entity.Content = model.Content;
+        entity.Starred = model.Starred;
+        entity.NotebookId = model.NotebookId;
+        if (model.Topics != null)
+        {
+            var topics = model.Topics
+                .Select(topic =>
+                {
+                    var topicEntity = db.Topics.FirstOrDefault(t => t.Id == topic.Id);
+                    return MapTopic(topic, topicEntity);
+                })
+                .ToList();
+            entity.Topics = topics;
+        }
+        entity.Created = model.Created;
+        entity.Modified = model.Modified;
+        return entity;
+    }
+
+    private static TopicEntity MapTopic(Topic model, TopicEntity? entity = null)
+    {
+        entity ??= new TopicEntity();
+        entity.Id = model.Id;
+        entity.Name = model.Name;
+        entity.Color = model.Color;
+        entity.Created = model.Created;
+        entity.Modified = model.Modified;
+        return entity;
+    }
 }

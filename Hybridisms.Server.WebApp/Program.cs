@@ -6,6 +6,8 @@ using Hybridisms.Server.WebApp.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
@@ -25,13 +27,6 @@ builder.Services.AddScoped<ITopicRecommendationService, DbTopicRecommendationSer
 // The Blazor server app only supports the local database service
 builder.Services.AddScoped<DbNotesService>();
 builder.Services.AddScoped<INotesService, DbNotesService>(svc => svc.GetRequiredService<DbNotesService>());
-
-// Turn on service discovery by default
-builder.Services.AddServiceDiscovery();
-builder.Services.ConfigureHttpClientDefaults(http =>
-{
-    http.AddServiceDiscovery();
-});
 
 var app = builder.Build();
 
@@ -71,5 +66,7 @@ app.MapRazorComponents<App>()
 
 // Map controller endpoints
 app.MapControllers();
+
+app.MapDefaultEndpoints();
 
 app.Run();

@@ -13,4 +13,29 @@ public interface INotesService
     IAsyncEnumerable<Topic> GetTopicsAsync(CancellationToken cancellationToken = default);
 
     Task<Note?> GetNoteAsync(Guid noteId, CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<Notebook> SaveNotebooksAsync(IEnumerable<Notebook> notebooks, CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<Note> SaveNotesAsync(IEnumerable<Note> notes, CancellationToken cancellationToken = default);
+}
+
+public static class NotesServiceExtensions
+{
+    public static async Task<Notebook> SaveNotebookAsync(this INotesService notesService, Notebook notebook, CancellationToken cancellationToken = default)
+    {
+        await foreach (var savedNotebook in notesService.SaveNotebooksAsync([notebook], cancellationToken).WithCancellation(cancellationToken))
+        {
+            return savedNotebook;
+        }
+        throw new InvalidOperationException("No notebook was returned after saving.");
+    }
+    
+    public static async Task<Note> SaveNoteAsync(this INotesService notesService, Note note, CancellationToken cancellationToken = default)
+    {
+        await foreach (var savedNote in notesService.SaveNotesAsync([note], cancellationToken).WithCancellation(cancellationToken))
+        {
+            return savedNote;
+        }
+        throw new InvalidOperationException("No note was returned after saving.");
+    }
 }

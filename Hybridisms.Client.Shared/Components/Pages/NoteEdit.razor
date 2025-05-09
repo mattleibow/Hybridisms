@@ -76,9 +76,9 @@ else
 
     private async Task HandleValidSubmit()
     {
-        if (note != null)
+        if (note is not null)
         {
-            @* await NotesService.UpdateNoteAsync(note); *@
+            await NotesService.SaveNoteAsync(note);
             GoBack();
         }
     }
@@ -96,7 +96,10 @@ else
 
     private void GoBack()
     {
-        NavigationManager.NavigateTo("/notebook/" + note?.NotebookId + "/notes");
+        if (note is not null)
+            NavigationManager.NavigateTo($"/notebook/{note?.NotebookId}/notes");
+        else
+            NavigationManager.NavigateTo("/");
     }
 
     private async Task OnNoteChanged(ChangeEventArgs e)

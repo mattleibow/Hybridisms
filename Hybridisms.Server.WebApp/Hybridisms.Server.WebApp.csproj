@@ -21,6 +21,7 @@
     <ProjectReference Include="..\Hybridisms.Server.Shared\Hybridisms.Server.Shared.csproj" />
     <ProjectReference Include="..\Hybridisms.Client.Shared\Hybridisms.Client.Shared.csproj" />
     <ProjectReference Include="..\Hybridisms.Client.WebAssembly\Hybridisms.Client.WebAssembly.csproj" />
+    <ProjectReference Include="..\Hybridisms.ServiceDefaults\Hybridisms.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

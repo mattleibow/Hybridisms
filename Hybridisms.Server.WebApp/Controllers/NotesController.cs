@@ -26,4 +26,15 @@ public class NotesController(INotesService noteService) : ControllerBase
             return NotFound();
         return Ok(note);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> SaveNotes([FromBody] IEnumerable<Note> notes)
+    {
+        var savedNotes = new List<Note>();
+        await foreach (var note in noteService.SaveNotesAsync(notes))
+        {
+            savedNotes.Add(note);
+        }
+        return Ok(savedNotes);
+    }
 }

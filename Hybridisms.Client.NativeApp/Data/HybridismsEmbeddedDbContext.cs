@@ -31,11 +31,20 @@ public class HybridismsEmbeddedDbContext(IOptions<HybridismsEmbeddedDbContext.Db
     public class DbSet<T>(SQLiteAsyncConnection connection) : AsyncTableQuery<T>(connection.GetConnection().Table<T>())
         where T : class, new()
     {
-        public async Task InsertAllAsync(IEnumerable<T> entities) =>
-            await connection.InsertAllAsync(entities);
-            
-        public async Task DeleteAllAsync() =>
-            await connection.DeleteAllAsync<T>();
+        public Task InsertAllAsync(IEnumerable<T> entities) =>
+            connection.InsertAllAsync(entities);
+
+        public Task InsertOrReplaceAllAsync(IEnumerable<T> entities) =>
+            connection.RunInTransactionAsync(conn =>
+            {
+                foreach (var entity in entities)
+                {
+                    conn.InsertOrReplace(entity);
+                }
+            });
+
+        public Task DeleteAllAsync() =>
+            connection.DeleteAllAsync<T>();
     }
 
     public class DbContextOptions

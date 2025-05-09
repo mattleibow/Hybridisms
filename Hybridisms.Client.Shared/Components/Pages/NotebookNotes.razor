@@ -10,6 +10,13 @@
 
 <h1>@notebookTitle</h1>
 
+@if (notebook != null)
+{
+    <div class="mb-3">
+        <a class="btn btn-secondary" href="/notebook/@notebook.Id/edit">Edit Notebook</a>
+    </div>
+}
+
 @if (notebookNotFound)
 {
     <p class="text-danger">No notebook was found for the given ID.</p>

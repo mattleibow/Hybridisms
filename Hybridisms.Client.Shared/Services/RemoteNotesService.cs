@@ -58,4 +58,32 @@ public class RemoteNotesService(HttpClient httpClient) : INotesService
             yield return topic;
         }
     }
+
+    public async IAsyncEnumerable<Notebook> SaveNotebooksAsync(IEnumerable<Notebook> notebooks, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("api/notebook", notebooks, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        await foreach (var notebook in response.Content.ReadFromJsonAsAsyncEnumerable<Notebook>(cancellationToken).WithCancellation(cancellationToken))
+        {
+            if (notebook is null)
+                continue;
+
+            yield return notebook;
+        }
+    }
+
+    public async IAsyncEnumerable<Note> SaveNotesAsync(IEnumerable<Note> notes, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("api/notes", notes, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        await foreach (var note in response.Content.ReadFromJsonAsAsyncEnumerable<Note>(cancellationToken).WithCancellation(cancellationToken))
+        {
+            if (note is null)
+                continue;
+                
+            yield return note;
+        }
+    }
 }
