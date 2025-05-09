@@ -21,16 +21,16 @@ builder.Services.AddDbContext<HybridismsDbContext>(options =>
 // Add controller services
 builder.Services.AddControllers();
 
-// Register topic recommendation service
-builder.Services.AddScoped<DbTopicRecommendationService>();
-builder.Services.AddScoped<ITopicRecommendationService, DbTopicRecommendationService>(static svc =>
-    svc.GetRequiredService<DbTopicRecommendationService>());
+// Register intelligence service
+builder.Services.AddScoped<IIntelligenceService, IntelligenceService>();
 
 // The Blazor server app only supports the local database service
-builder.Services.AddScoped<DbNotesService>();
-builder.Services.AddScoped<INotesService, DbNotesService>(static svc =>
-    svc.GetRequiredService<DbNotesService>());
+builder.Services.AddScoped<INotesService, DbNotesService>();
 
+// Register natural language service abstraction
+builder.Services.AddScoped<INaturalLanguageService, OpenAINaturalLanguageService>();
+
+// Register Azure OpenAI client
 builder.AddAzureOpenAIClient("ai")
     .AddChatClient("ai-model");
 

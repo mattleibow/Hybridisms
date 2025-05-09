@@ -5,16 +5,16 @@ namespace Hybridisms.Server.WebApp.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class RecommendationController(ITopicRecommendationService topicRecommendations) : ControllerBase
+public class IntelligenceController(IIntelligenceService intelligenceService) : ControllerBase
 {
-    [HttpPost("topics")]
+    [HttpPost("recommend-topics")]
     public async Task<ActionResult> RecommendTopics([FromQuery] int count, [FromBody] Note note)
     {
-        var topics = new List<Topic>();
-        await foreach (var topic in topicRecommendations.RecommendTopicsAsync(note, count))
+        var recommendations = new List<TopicRecommendation>();
+        await foreach (var recommendation in intelligenceService.RecommendTopicsAsync(note, count))
         {
-            topics.Add(topic);
+            recommendations.Add(recommendation);
         }
-        return Ok(topics);
+        return Ok(recommendations);
     }
 }

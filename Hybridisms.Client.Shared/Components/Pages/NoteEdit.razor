@@ -5,7 +5,7 @@
 @using Hybridisms.Client.Shared.Components
 
 @inject INotesService NotesService
-@inject ITopicRecommendationService TopicRecommendationService
+@inject IIntelligenceService IntelligenceService
 @inject NavigationManager NavigationManager
 
 <h3>Edit Note</h3>
@@ -130,9 +130,9 @@ else
             return;
 
         recommendedTags = new List<string>();
-        await foreach (var topic in TopicRecommendationService.RecommendTopicsAsync(note, 3))
+        await foreach (var recommendation in IntelligenceService.RecommendTopicsAsync(note, 3))
         {
-            if (topic?.Name is not string name || string.IsNullOrWhiteSpace(name))
+            if (recommendation?.Topic?.Name is not string name || string.IsNullOrWhiteSpace(name))
                 continue;
 
             recommendedTags.Add(name);

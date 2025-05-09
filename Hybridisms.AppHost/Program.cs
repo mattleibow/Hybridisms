@@ -9,8 +9,12 @@ var ai = builder.AddAzureOpenAI("ai")
          var resources = infra.GetProvisionableResources();
          var account = resources.OfType<CognitiveServicesAccountDeployment>().Single();
          account.Sku.Name = "GlobalStandard";
-     })
-    .AddDeployment("ai-model", "gpt-4o-mini", "2024-07-18");
+     });
+     
+ai.AddDeployment(
+    name: "ai-model",
+    modelName: "gpt-4o-mini",
+    modelVersion: "2024-07-18");
 
 builder.AddProject<Projects.Hybridisms_Server_WebApp>("webapp")
     .WithReference(ai);
