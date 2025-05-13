@@ -17,6 +17,8 @@ public interface INotesService
     IAsyncEnumerable<Notebook> SaveNotebooksAsync(IEnumerable<Notebook> notebooks, CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<Note> SaveNotesAsync(IEnumerable<Note> notes, CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<Topic> SaveTopicsAsync(IEnumerable<Topic> topics, CancellationToken cancellationToken = default);
 }
 
 public static class NotesServiceExtensions

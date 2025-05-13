@@ -168,6 +168,44 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         return note;
     }
 
+    public async IAsyncEnumerable<Topic> SaveTopicsAsync(IEnumerable<Topic> topics, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var savedTopics = new List<Topic>();
+        foreach (var topic in topics)
+        {
+            var updatedTopic = await SaveTopicAsync(topic, cancellationToken);
+            savedTopics.Add(updatedTopic);
+        }
+        foreach (var savedTopic in savedTopics)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return savedTopic;
+        }
+    }
+
+    private async Task<Topic> SaveTopicAsync(Topic topic, CancellationToken cancellationToken)
+    {
+        var entity = await db.Topics.FirstOrDefaultAsync(t => t.Id == topic.Id, cancellationToken);
+        if (entity is null)
+        {
+            // If the topic does not exist, create a new one
+            entity = MapTopic(topic);
+            db.Topics.Add(entity);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        else if (topic.Modified > entity.Modified)
+        {
+            // If the incoming topic is newer, update the entity
+            MapTopic(topic, entity);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        // else: If the incoming topic is older or the same age, do nothing
+
+        // return the updated or newly created topic
+        topic = MapTopic(entity);
+        return topic;
+    }
+
     private static Notebook MapNotebook(NotebookEntity entity) =>
         new Notebook
         {

@@ -137,6 +137,13 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            await foreach (var topic in SaveTopicsAsync(note.Topics, cancellationToken))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // No need to do anything with the topic, just ensure it is saved
+            }
+
             var entity = await db.Notes.FirstOrDefaultAsync(n => n.Id == note.Id);
             entity = await MapNoteTopicsAsync(note, entity, cancellationToken);
             savedEntities.Add(entity);
@@ -149,6 +156,30 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
             cancellationToken.ThrowIfCancellationRequested();
 
             yield return note;
+        }
+    }
+
+    public async IAsyncEnumerable<Topic> SaveTopicsAsync(IEnumerable<Topic> topics, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await EnsureCreatedAsync();
+
+        var savedEntities = new List<TopicEntity>();
+        foreach (var topic in topics)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var entity = await db.Topics.FirstOrDefaultAsync(t => t.Id == topic.Id);
+            entity = MapTopic(topic, entity);
+            savedEntities.Add(entity);
+        }
+
+        await db.Topics.InsertOrReplaceAllAsync(savedEntities);
+
+        foreach (var topic in topics)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            yield return topic;
         }
     }
 

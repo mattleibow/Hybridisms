@@ -17,4 +17,15 @@ public class TopicsController(INotesService noteService) : ControllerBase
         }
         return Ok(topics);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> SaveTopics([FromBody] IEnumerable<Topic> topics)
+    {
+        var saved = new List<Topic>();
+        await foreach (var topic in noteService.SaveTopicsAsync(topics))
+        {
+            saved.Add(topic);
+        }
+        return Ok(saved);
+    }
 }

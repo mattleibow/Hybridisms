@@ -95,10 +95,20 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
 
         return GetOrSyncAsync(
             local.GetTopicsAsync,
-            null,
+            local.SaveTopicsAsync,
             remote.GetTopicsAsync,
             null,
             cancellationToken);
+    }
+
+    public async IAsyncEnumerable<Topic> SaveTopicsAsync(IEnumerable<Topic> topics, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        logger?.LogInformation("Saving topics...");
+
+        await foreach (var topic in local.SaveTopicsAsync(topics, cancellationToken).WithCancellation(cancellationToken))
+        {
+            yield return topic;
+        }
     }
 
     private async Task CopyFromRawResourcesAsync(CancellationToken cancellationToken = default)
