@@ -43,13 +43,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.60" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.60" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.4" />
-    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.2.1" />
-    <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntimeGenAI" Version="0.7.1" />
-    <PackageReference Include="Microsoft.ML.Tokenizers" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Maui.Controls" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
+    <PackageReference Include="sqlite-net-pcl" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntimeGenAI" />
+    <PackageReference Include="Microsoft.ML.Tokenizers" />
   </ItemGroup>
 
   <ItemGroup>
@@ -75,7 +75,7 @@
     <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
     <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
     <MauiAsset Include="..\artifacts\models\all-MiniLM-L6-v2\model.zip*" Link="Resources\Raw\Models\miniml_model.zip" LogicalName="Models\miniml_model.zip" />
-    <MauiAsset Include="..\artifacts\models\Qwen2.5-0.5B-Instruct\model_int8.zip*" Link="Resources\Raw\Models\qwen2_model.zip" LogicalName="Models\qwen2_model.zip" />
+    <MauiAsset Include="..\artifacts\models\Qwen2.5-0.5B-Instruct\model_int8.zip*" LogicalName="Models\qwen2_model.zip" />
   </ItemGroup>
 
 </Project>

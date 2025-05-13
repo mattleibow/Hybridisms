@@ -3,10 +3,12 @@ using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.ML.Tokenizers;
 using Microsoft.Extensions.Options;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 
 namespace Hybridisms.Client.NativeApp.Services;
 
-public class OnnxEmbeddingClient(IOptions<OnnxEmbeddingClient.EmbeddingClientOptions> options) : OnnxModelClient<OnnxEmbeddingClient.EmbeddingClientOptions>(options)
+public class OnnxEmbeddingClient(IOptions<OnnxEmbeddingClient.EmbeddingClientOptions> options, ILogger<OnnxEmbeddingClient>? logger)
+    : OnnxModelClient<OnnxEmbeddingClient.EmbeddingClientOptions>(options, logger)
 {
     private BertTokenizer? tokenizer;
     private InferenceSession? embeddingSession;
@@ -21,19 +23,28 @@ public class OnnxEmbeddingClient(IOptions<OnnxEmbeddingClient.EmbeddingClientOpt
         if (embeddingSession is not null && tokenizer is not null)
             return (embeddingSession, tokenizer);
 
+        logger?.LogInformation("Loading ONNX model and tokenizer...");
+
         var vocabPath = Path.Combine(options.Value.ExtractedPath, "vocab.txt");
         tokenizer = BertTokenizer.Create(vocabPath);
 
         var modelPath = Path.Combine(options.Value.ExtractedPath, "model.onnx");
         embeddingSession = new InferenceSession(modelPath);
 
+        logger?.LogInformation("ONNX model and tokenizer loaded successfully.");
+
         return (embeddingSession, tokenizer);
     }
 
     public async IAsyncEnumerable<(T Match, float Similarity)> GetRankedMatchesAsync<T>(string text, IEnumerable<T> options, Func<T, string> optionTextSelector, int count = 3, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        logger?.LogInformation("Ranking matches for text: {Text}", text);
+
         if (string.IsNullOrWhiteSpace(text))
+        {
+            logger?.LogWarning("Text is null or empty.");
             yield break;
+        }
 
         var topicEmbeddings = new List<(T Option, Tensor<float> Embedding)>();
         foreach (var option in options)
@@ -49,7 +60,10 @@ public class OnnxEmbeddingClient(IOptions<OnnxEmbeddingClient.EmbeddingClientOpt
         }
 
         if (topicEmbeddings.Count == 0)
+        {
+            logger?.LogWarning("No valid options provided for ranking.");
             yield break;
+        }
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -60,6 +74,8 @@ public class OnnxEmbeddingClient(IOptions<OnnxEmbeddingClient.EmbeddingClientOpt
             .OrderByDescending(x => x.Similarity)
             .Take(count)
             .ToList();
+
+        logger?.LogInformation("Found {Count} ranked matches.", ranked.Count);
 
         foreach (var item in ranked)
         {

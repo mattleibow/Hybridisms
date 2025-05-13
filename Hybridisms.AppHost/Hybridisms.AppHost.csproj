@@ -12,16 +12,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.2.1" />
-		<PackageReference Include="Aspire.Hosting.Azure.CognitiveServices" Version="9.2.1" />
-		<PackageReference Include="AspireMobile.Hosting" Version="0.7.130-beta" />
-		<PackageReference Include="Microsoft.Extensions.AI" Version="9.4.3-preview.1.25230.7" />
-		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.4.3-preview.1.25230.7" />
-		<PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.2.1-preview.1.25222.1" />
+		<PackageReference Include="Aspire.Hosting.AppHost" />
+		<PackageReference Include="Aspire.Hosting.Azure.CognitiveServices" />
+		<PackageReference Include="AspireMobile.Hosting" />
+		<PackageReference Include="Microsoft.Extensions.AI" />
+		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
+		<PackageReference Include="Aspire.Azure.AI.OpenAI" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Hybridisms.Server.WebApp\Hybridisms.Server.WebApp.csproj" />
+		<ProjectReference Include="..\Hybridisms.Client.NativeApp.ClientStub\Hybridisms.Client.NativeApp.ClientStub.csproj" />
 	</ItemGroup>
 
 </Project>

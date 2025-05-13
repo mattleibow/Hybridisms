@@ -1,4 +1,5 @@
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.ML.OnnxRuntimeGenAI;
 using System.Runtime.CompilerServices;
@@ -6,7 +7,8 @@ using System.Text;
 
 namespace Hybridisms.Client.NativeApp.Services;
 
-public class OnnxChatClient(IOptions<OnnxChatClient.ChatClientOptions> options) : OnnxModelClient<OnnxChatClient.ChatClientOptions>(options), IChatClient
+public class OnnxChatClient(IOptions<OnnxChatClient.ChatClientOptions> options, ILogger<OnnxChatClient>? logger)
+    : OnnxModelClient<OnnxChatClient.ChatClientOptions>(options, logger), IChatClient
 {
     private OnnxRuntimeGenAIChatClient? loadedClient;
 
@@ -19,6 +21,8 @@ public class OnnxChatClient(IOptions<OnnxChatClient.ChatClientOptions> options) 
 
         if (loadedClient is not null)
             return loadedClient;
+
+        logger?.LogInformation("Loading ONNX chat model...");
 
         var clientOptions = new OnnxRuntimeGenAIChatClientOptions
         {
@@ -48,11 +52,15 @@ public class OnnxChatClient(IOptions<OnnxChatClient.ChatClientOptions> options) 
 
         loadedClient = new OnnxRuntimeGenAIChatClient(options.Value.ExtractedPath, clientOptions);
 
+        logger?.LogInformation("ONNX chat model loaded successfully.");
+
         return loadedClient;
     }
 
     public async Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
+        logger?.LogInformation("Getting chat response...");
+
         var client = await LoadClientAsync();
 
         return await client.GetResponseAsync(messages, options, cancellationToken);
@@ -60,6 +68,8 @@ public class OnnxChatClient(IOptions<OnnxChatClient.ChatClientOptions> options) 
 
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        logger?.LogInformation("Getting streaming chat response...");
+        
         var client = await LoadClientAsync();
 
         await foreach (var update in client.GetStreamingResponseAsync(messages, options, cancellationToken).WithCancellation(cancellationToken))

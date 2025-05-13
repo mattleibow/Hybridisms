@@ -1,74 +1,104 @@
 using System.Runtime.CompilerServices;
 using Hybridisms.Client.NativeApp.Data;
 using Hybridisms.Client.Shared.Services;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Hybridisms.Client.NativeApp.Services;
 
-public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService local, IOptions<HybridismsEmbeddedDbContext.DbContextOptions> options) : INotesService
+public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService local, IOptions<HybridismsEmbeddedDbContext.DbContextOptions> options, ILogger<HybridNotesService>? logger)
+    : INotesService
 {
-    public IAsyncEnumerable<Notebook> GetNotebooksAsync(CancellationToken cancellationToken = default) =>
-        GetOrSyncAsync(
+    public IAsyncEnumerable<Notebook> GetNotebooksAsync(CancellationToken cancellationToken = default)
+    {
+        logger?.LogInformation("Fetching all notebooks...");
+
+        return GetOrSyncAsync(
             local.GetNotebooksAsync,
             local.SaveNotebooksAsync,
             remote.GetNotebooksAsync,
             remote.SaveNotebooksAsync,
             cancellationToken);
+    }
 
-    public Task<Notebook?> GetNotebookAsync(Guid notebookId, CancellationToken cancellationToken = default) =>
-        GetOrSyncAsync(
+    public Task<Notebook?> GetNotebookAsync(Guid notebookId, CancellationToken cancellationToken = default)
+    {
+        logger?.LogInformation("Fetching notebook with ID: {NotebookId}", notebookId);
+
+        return GetOrSyncAsync(
             ct => local.GetNotebookAsync(notebookId, ct),
             local.SaveNotebookAsync,
             ct => remote.GetNotebookAsync(notebookId, ct),
             remote.SaveNotebookAsync,
             cancellationToken);
+    }
 
     public async IAsyncEnumerable<Notebook> SaveNotebooksAsync(IEnumerable<Notebook> notebooks, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        logger?.LogInformation("Saving notebooks...");
+
         await foreach (var notebook in local.SaveNotebooksAsync(notebooks, cancellationToken).WithCancellation(cancellationToken))
         {
             yield return notebook;
         }
     }
 
-    public IAsyncEnumerable<Note> GetNotesAsync(Guid notebookId, CancellationToken cancellationToken = default) =>
-        GetOrSyncAsync(
+    public IAsyncEnumerable<Note> GetNotesAsync(Guid notebookId, CancellationToken cancellationToken = default)
+    {
+        logger?.LogInformation("Fetching notes for notebook with ID: {NotebookId}", notebookId);
+
+        return GetOrSyncAsync(
             ct => local.GetNotesAsync(notebookId, ct),
             local.SaveNotesAsync,
             ct => remote.GetNotesAsync(notebookId, ct),
             remote.SaveNotesAsync,
             cancellationToken);
+    }
 
-    public Task<Note?> GetNoteAsync(Guid noteId, CancellationToken cancellationToken = default) =>
-        GetOrSyncAsync(
+    public Task<Note?> GetNoteAsync(Guid noteId, CancellationToken cancellationToken = default)
+    {
+        logger?.LogInformation("Fetching note with ID: {NoteId}", noteId);
+
+        return GetOrSyncAsync(
             ct => local.GetNoteAsync(noteId, ct),
             local.SaveNoteAsync,
             ct => remote.GetNoteAsync(noteId, ct),
             remote.SaveNoteAsync,
             cancellationToken);
+    }
 
     public async IAsyncEnumerable<Note> SaveNotesAsync(IEnumerable<Note> notes, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        logger?.LogInformation("Saving notes...");
+
         await foreach (var note in local.SaveNotesAsync(notes, cancellationToken).WithCancellation(cancellationToken))
         {
             yield return note;
         }
     }
 
-    public IAsyncEnumerable<Note> GetStarredNotesAsync(CancellationToken cancellationToken = default) =>
-        GetOrSyncAsync(
+    public IAsyncEnumerable<Note> GetStarredNotesAsync(CancellationToken cancellationToken = default)
+    {
+        logger?.LogInformation("Fetching starred notes...");
+
+        return GetOrSyncAsync(
             local.GetStarredNotesAsync,
             null,
             remote.GetStarredNotesAsync,
             null,
             cancellationToken);
+    }
 
-    public async IAsyncEnumerable<Topic> GetTopicsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public IAsyncEnumerable<Topic> GetTopicsAsync(CancellationToken cancellationToken = default)
     {
-        await foreach (var topic in remote.GetTopicsAsync(cancellationToken).WithCancellation(cancellationToken))
-        {
-            yield return topic;
-        }
+        logger?.LogInformation("Fetching all topics...");
+
+        return GetOrSyncAsync(
+            local.GetTopicsAsync,
+            null,
+            remote.GetTopicsAsync,
+            null,
+            cancellationToken);
     }
 
     private async Task CopyFromRawResourcesAsync(CancellationToken cancellationToken = default)
@@ -81,7 +111,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         await raw.CopyToAsync(fileStream, cancellationToken);
     }
 
-    private static async IAsyncEnumerable<T> GetOrSyncAsync<T>(
+    private async IAsyncEnumerable<T> GetOrSyncAsync<T>(
         Func<CancellationToken, IAsyncEnumerable<T>> getLocal,
         Func<IEnumerable<T>, CancellationToken, IAsyncEnumerable<T>>? saveLocal,
         Func<CancellationToken, IAsyncEnumerable<T>> getRemote,
@@ -91,6 +121,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         // Local data path check
         {
             // Load local data first, return them as they are loaded but also cache them for later
+            logger?.LogInformation("Fetching local data...");
             var localData = new List<T>();
             await foreach (var data in getLocal(cancellationToken).WithCancellation(cancellationToken))
             {
@@ -102,6 +133,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
             if (localData.Count > 0)
             {
                 // Start sync in background, but do not block return
+                logger?.LogInformation("Syncing local data to remote...");
                 _ = SyncAsync(localData, cancellationToken);
                 yield break;
             }
@@ -114,6 +146,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
             try
             {
                 // Try to fetch remote data
+                logger?.LogInformation("Fetching remote data...");
                 await foreach (var data in getRemote(cancellationToken).WithCancellation(cancellationToken))
                 {
                     remoteData.Add(data);
@@ -128,6 +161,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
             if (remoteData.Count > 0)
             {
                 // Save remote data to local
+                logger?.LogInformation("Saving remote data to local...");
                 var localData = await SaveLocalAsync(remoteData, cancellationToken);
 
                 // Return all the saved data
@@ -179,7 +213,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         }
     }
 
-    private static async Task<T?> GetOrSyncAsync<T>(
+    private async Task<T?> GetOrSyncAsync<T>(
         Func<CancellationToken, Task<T?>> getLocal,
         Func<T, CancellationToken, Task<T>>? saveLocal,
         Func<CancellationToken, Task<T?>> getRemote,
@@ -188,10 +222,12 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         where T : class
     {
         // Try local first
+        logger?.LogInformation("Fetching local data...");
         var localItem = await getLocal(cancellationToken);
         if (localItem is not null)
         {
             // Start sync to remote in background
+            logger?.LogInformation("Syncing local data to remote...");
             _ = SyncAsync(localItem, cancellationToken);
             return localItem;
         }
@@ -200,6 +236,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         T? remoteItem = null;
         try
         {
+            logger?.LogInformation("Fetching remote data...");
             remoteItem = await getRemote(cancellationToken);
         }
         catch (Exception)
@@ -210,11 +247,13 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         if (remoteItem is not null)
         {
             // Save remote to local
+            logger?.LogInformation("Saving remote data to local...");
             var savedLocal = await SaveLocalAsync(remoteItem, cancellationToken);
             return savedLocal;
         }
 
         // Not found anywhere
+        logger?.LogWarning("No data found locally or remotely.");
         return null;
 
         async Task<T> SyncAsync(T localData, CancellationToken cancellationToken)
