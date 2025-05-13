@@ -18,4 +18,16 @@ public class RemoteIntelligenceService(HttpClient httpClient) : IIntelligenceSer
             yield return recommendation;
         }
     }
+
+    public async IAsyncEnumerable<string> StreamNoteContentsAsync(string prompt, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync($"api/intelligence/stream-note-contents", prompt, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var contents = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(contents))
+            yield break;
+
+        yield return contents;
+    }
 }

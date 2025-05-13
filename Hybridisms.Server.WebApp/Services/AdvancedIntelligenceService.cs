@@ -1,9 +1,10 @@
 using System.Runtime.CompilerServices;
 using Hybridisms.Client.Shared.Services;
+using Microsoft.Extensions.AI;
 
 namespace Hybridisms.Server.WebApp.Services;
 
-public class IntelligenceService(INotesService db, INaturalLanguageService nlp) : IIntelligenceService
+public class AdvancedIntelligenceService(INotesService db, IChatClient chatClient) : IIntelligenceService
 {
     private sealed record SelectedLabel(string Label, string Reason);
 
@@ -27,18 +28,11 @@ public class IntelligenceService(INotesService db, INaturalLanguageService nlp) 
         var topicsListString = string.Join(", ", topicNames);
 
         // Instruct the AI to return a JSON array of objects with label and reason for each selected topic.
-        var prompt = $$"""
-            Given the following note content, select the {{count}} most relevant
-            topics from the provided list.
-
-            Note content:
-            {{note.Title}}
-
-            {{note.Content}}
-
-            Available topics:
-            {{topicsListString}}
-
+        const string systemPrompt = """
+            You are a helpful assistant that provides topic recommendations based on note content.
+            You will be given a note and a list of available topics. Your task is to select the
+            most relevant topics from the list based on the note's content.
+            
             Respond in a properly formatted JSON as an array of objects, each with a "label"
             (the topic name from the list above) and a "reason" (why you selected it). Do
             not include any other text or explanations or wrapping code blocks.
@@ -50,11 +44,21 @@ public class IntelligenceService(INotesService db, INaturalLanguageService nlp) 
               { "label": "Topic2", "reason": "Reason for Topic2" }
             ]
             
-            Only include up to {{count}} topics from the list above.
+            """;
+        var prompt = $$"""
+            Select the {{count}} most relevant topics for this note:
+
+            Note content:
+            {{note.Title}}
+
+            {{note.Content}}
+
+            Available topics:
+            {{topicsListString}}
             """;
 
         // Use the natural language service to get the response from the AI model.
-        var selectedLabels = await nlp.GetResponseAsync<List<SelectedLabel>>(prompt, cancellationToken);
+        var selectedLabels = await chatClient.GetResponseAsync<List<SelectedLabel>>(systemPrompt, prompt, null, cancellationToken);
         if (selectedLabels is null || selectedLabels.Count == 0)
         {
             yield break;
@@ -74,6 +78,18 @@ public class IntelligenceService(INotesService db, INaturalLanguageService nlp) 
                 Topic = topic,
                 Reason = label.Reason
             };
+        }
+    }
+
+    public async IAsyncEnumerable<string> StreamNoteContentsAsync(string prompt, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        const string systemPrompt = """
+            You are a note-taking assistant that generates short notes.
+            """;
+
+        await foreach (var update in chatClient.GetStreamingResponseAsync(systemPrompt, prompt, null, cancellationToken).WithCancellation(cancellationToken))
+        {
+            yield return update ?? "";
         }
     }
 }

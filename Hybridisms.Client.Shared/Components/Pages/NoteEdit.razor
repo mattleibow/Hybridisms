@@ -29,7 +29,12 @@ else
         </div>
         <div class="mb-3">
             <label for="content" class="form-label">Content</label>
-            <InputTextArea id="content" class="form-control" @bind-Value="note.Content" @oninput="OnNoteChanged" />
+            <button type="button" class="btn btn-info btn-sm ms-2" @onclick="GenerateFromContent" disabled="@(isGenerating)">Generate</button>
+            @if (isGenerating)
+            {
+                <span class="ms-2"><em>Generating...</em></span>
+            }
+            <InputTextArea id="content" class="form-control mt-2" @bind-Value="note.Content" @oninput="OnNoteChanged" />
         </div>
         <TagInput Tags="tagNames" AvailableTags="availableTags" TagsChanged="OnTagsChanged" Label="Topics" Placeholder="Add topics..." RecommendedTags="recommendedTags" />
         <button type="submit" class="btn btn-success">Save</button>
@@ -49,6 +54,7 @@ else
     private List<Topic> availableTopicObjects = [];
     private List<string> recommendedTags = [];
     private CancellationTokenSource? debounceCts;
+    private bool isGenerating = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -139,5 +145,35 @@ else
         }
 
         Console.WriteLine($"Recommended tags: {string.Join(", ", recommendedTags)}");
+    }
+
+    private async Task GenerateFromContent()
+    {
+        if (string.IsNullOrWhiteSpace(note?.Content))
+            return;
+        
+        isGenerating = true;
+
+        try
+        {
+            var prompt = note.Content;
+
+            var first = true;
+            await foreach (var generated in IntelligenceService.StreamNoteContentsAsync(prompt))
+            {
+                if (first)
+                {
+                    first = false;
+                    note.Content = string.Empty;
+                }
+
+                note.Content += generated;
+                StateHasChanged();
+            }
+        }
+        finally
+        {
+            isGenerating = false;
+        }
     }
 }

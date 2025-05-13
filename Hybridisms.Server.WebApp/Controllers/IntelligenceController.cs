@@ -1,3 +1,4 @@
+using System.Text;
 using Hybridisms.Client.Shared.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,5 +17,16 @@ public class IntelligenceController(IIntelligenceService intelligenceService) : 
             recommendations.Add(recommendation);
         }
         return Ok(recommendations);
+    }
+
+    [HttpPost("stream-note-contents")]
+    public async Task<ActionResult> StreamNoteContents([FromBody] string prompt)
+    {
+        var sb = new StringBuilder();
+        await foreach (var content in intelligenceService.StreamNoteContentsAsync(prompt))
+        {
+            sb.Append(content);
+        }
+        return Ok(sb.ToString());
     }
 }
