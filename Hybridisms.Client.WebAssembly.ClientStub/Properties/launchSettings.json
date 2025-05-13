@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Hybridisms.Client.WebAssembly.ClientStub": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

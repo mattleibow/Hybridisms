@@ -23,6 +23,8 @@ if (builder.ExecutionContext.IsRunMode)
 {
     builder.AddMobileProject("mobile", "../Hybridisms.Client.NativeApp")
         .WithReference(web);
+    builder.AddMobileProject("wasm", "../Hybridisms.Client.WebAssembly")
+        .WithReference(web);
 }
 
 builder.Build().Run();

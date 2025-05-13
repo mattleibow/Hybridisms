@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Logs;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -33,9 +34,9 @@ public static class AppDefaultsExtensions
         return builder;
     }
 
-    public static IConfigurationBuilder AddDevTunnels(this IConfigurationBuilder builder, Dictionary<string, string> settings, string? devTunnelId = null)
+    public static IConfigurationBuilder AddDevTunnelsInMemoryCollection(this IConfigurationBuilder builder, Dictionary<string, string?> settings, string? devTunnelId = null)
     {
-        var copy = new Dictionary<string, string>(settings);
+        var copy = new Dictionary<string, string?>(settings);
 
         if (!string.IsNullOrWhiteSpace(devTunnelId))
         {
@@ -50,8 +51,11 @@ public static class AppDefaultsExtensions
         return builder;
     }
 
-    private static string ReplaceLocalHost(string uri, string devTunnelId)
+    private static string? ReplaceLocalHost(string? uri, string devTunnelId)
     {
+        if (uri is null)
+            return uri;
+            
         // source format is `http[s]://localhost:[port]`
         // tunnel format is `http[s]://exciting-tunnel-[port].devtunnels.ms`
 
@@ -70,8 +74,7 @@ public static class AppDefaultsExtensions
         {
             services.GetService<MeterProvider>();
             services.GetService<TracerProvider>();
-            // TO DO: Uncomment when LoggerProvider is public, with OpenTelemetry.Api version 1.9.0
-            //services.GetService<LoggerProvider>();
+            services.GetService<LoggerProvider>();
         }
     }
 

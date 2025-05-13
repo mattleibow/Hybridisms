@@ -17,20 +17,12 @@ public static class MauiProgram
 
         var builder = MauiApp.CreateBuilder();
 
+#if DEBUG
+        builder.Configuration.AddDevTunnelsInMemoryCollection(AspireAppSettings.Settings, null); // TODO: set up dev tunnels
+#endif
+
         // Add Aspire/ServiceDefaults configuration
         builder.AddServiceDefaults();
-
-        // #if DEBUG
-        //         builder.Configuration.AddAspireApp(AspireAppSettings.Settings, "exciting-tunnel");
-        // #endif
-
-        // TODO: Add a better way to set these values
-        builder.Configuration.AddInMemoryCollection(
-            new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:Hybridisms"] = "Hybridisms.db",
-                ["Services:api:https:0"] = "https://localhost:7201",
-            });
 
         // Register the main Maui app and configure fonts
         builder
@@ -43,23 +35,16 @@ public static class MauiProgram
         // Add Blazor WebView for hybrid UI
         builder.Services.AddMauiBlazorWebView();
 
-        // Enable service discovery and configure HTTP client defaults
-        builder.Services.AddServiceDiscovery();
-        builder.Services.ConfigureHttpClientDefaults(http =>
-        {
-            http.AddServiceDiscovery();
-        });
-
         // Register SQLite database context for local data storage
         builder.Services.AddOptions<HybridismsEmbeddedDbContext.DbContextOptions>()
-            .Configure(options => 
+            .Configure(options =>
             {
-                options.DatabasePath = Path.Combine(FileSystem.AppDataDirectory, builder.Configuration.GetConnectionString("Hybridisms")!);
+                options.DatabasePath = Path.Combine(FileSystem.AppDataDirectory, "hybridisms.db");
             });
         builder.Services.AddSingleton<HybridismsEmbeddedDbContext>();
 
         // Register notes services
-        builder.Services.AddHttpClient<RemoteNotesService>(static client => client.BaseAddress = new("https://api/"));
+        builder.Services.AddHttpClient<RemoteNotesService>(static client => client.BaseAddress = new("https://webapp/"));
         builder.Services.AddSingleton<EmbeddedNotesService>();
 
         // Register ONNX clients for local AI processing
@@ -79,7 +64,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<OnnxChatClient>();
 
         // Register intelligence services for AI capabilities
-        builder.Services.AddHttpClient<RemoteIntelligenceService>(static client => client.BaseAddress = new("https://api/"));
+        builder.Services.AddHttpClient<RemoteIntelligenceService>(static client => client.BaseAddress = new("https://webapp/"));
         builder.Services.AddSingleton<EmbeddedIntelligenceService>();
 
         // Register the hybrid services that we will use

@@ -34,7 +34,7 @@ else
             {
                 <span class="ms-2"><em>Generating...</em></span>
             }
-            <InputTextArea id="content" class="form-control mt-2" @bind-Value="note.Content" @oninput="OnNoteChanged" />
+            <InputTextArea id="content" rows="10" class="form-control mt-2" @bind-Value="note.Content" @oninput="OnNoteChanged" />
         </div>
         <TagInput Tags="tagNames" AvailableTags="availableTags" TagsChanged="OnTagsChanged" Label="Topics" Placeholder="Add topics..." RecommendedTags="recommendedTags" />
         <button type="submit" class="btn btn-success">Save</button>

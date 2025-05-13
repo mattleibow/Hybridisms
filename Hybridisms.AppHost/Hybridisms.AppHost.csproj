@@ -22,6 +22,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Hybridisms.Server.WebApp\Hybridisms.Server.WebApp.csproj" />
+		<ProjectReference Include="..\Hybridisms.Client.WebAssembly.ClientStub\Hybridisms.Client.WebAssembly.ClientStub.csproj" />
 		<ProjectReference Include="..\Hybridisms.Client.NativeApp.ClientStub\Hybridisms.Client.NativeApp.ClientStub.csproj" />
 	</ItemGroup>
 
