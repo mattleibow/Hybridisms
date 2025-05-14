@@ -6,11 +6,11 @@ Hybridisms is a distributed, cross-platform note-taking and knowledge management
 
 The Hybridisms solution is composed of several projects, each with a specific role:
 
-### 1. **Hybridisms.AppHost**
+### 1. **Hybridisms.AppHost** ([README](Hybridisms.AppHost/README.md))
 - **Purpose:** The main entry point and orchestrator for the solution, using .NET Aspire to coordinate all services and clients.
 - **Role:** Starts and configures the backend server, web client, and native/mobile clients. Manages distributed application settings and cloud resources (e.g., Azure OpenAI).
 
-### 2. **Hybridisms.Server.WebApp**
+### 2. **Hybridisms.Server.WebApp** ([README](Hybridisms.Server.WebApp/README.md))
 - **Purpose:** The main backend server and web application.
 - **Role:**
   - Hosts the HTTP API for notes, notebooks, topics, and AI features.
@@ -19,14 +19,14 @@ The Hybridisms solution is composed of several projects, each with a specific ro
   - Integrates with Azure OpenAI for advanced intelligence features.
   - Provides Blazor server-side UI components.
 
-### 3. **Hybridisms.Client.WebAssembly**
+### 3. **Hybridisms.Client.WebAssembly** ([README](Hybridisms.Client.WebAssembly/README.md))
 - **Purpose:** The Blazor WebAssembly (WASM) client for browser-based access.
 - **Role:**
   - Runs entirely in the browser using WebAssembly.
   - Connects to the backend server for data and AI features.
   - Shares UI and logic with the native client via `Hybridisms.Client.Shared`.
 
-### 4. **Hybridisms.Client.NativeApp**
+### 4. **Hybridisms.Client.NativeApp** ([README](Hybridisms.Client.NativeApp/README.md))
 - **Purpose:** The .NET MAUI (native) client for cross-platform mobile and desktop use.
 - **Role:**
   - Delivers a native app experience on Windows, macOS, Android, and iOS.
@@ -34,26 +34,26 @@ The Hybridisms solution is composed of several projects, each with a specific ro
   - Integrates ONNX models for local AI features when available.
   - Shares UI and logic with the web client via `Hybridisms.Client.Shared`.
 
-### 5. **Hybridisms.Client.Shared**
+### 5. **Hybridisms.Client.Shared** ([README](Hybridisms.Client.Shared/README.md))
 - **Purpose:** Shared business logic, data models, and Blazor UI components for both web and native clients.
 - **Role:**
   - Defines models for notes, notebooks, and topics.
   - Provides service interfaces and remote/local implementations.
   - Supplies reusable Blazor components and utilities for hybrid rendering.
 
-### 6. **Hybridisms.Server.Shared**
+### 6. **Hybridisms.Server.Shared** ([README](Hybridisms.Server.Shared/README.md))
 - **Purpose:** Shared code, components, and resources for server-side projects.
 - **Role:**
   - Provides reusable Blazor components and shared logic for server-side applications.
 
 ### 7. **ServiceDefaults Projects**
-- **Hybridisms.Server.Web.ServiceDefaults**: Shared service configuration and extension methods for server-side projects (e.g., service discovery, resilience, health checks, OpenTelemetry).
-- **Hybridisms.Client.Native.ServiceDefaults**: Shared service configuration for MAUI (native) clients.
-- **Hybridisms.Client.WebAssembly.ServiceDefaults**: Shared service configuration for Blazor WebAssembly clients.
+- **Hybridisms.Server.Web.ServiceDefaults** ([README](Hybridisms.Server.Web.ServiceDefaults/README.md)): Shared service configuration and extension methods for server-side projects (e.g., service discovery, resilience, health checks, OpenTelemetry).
+- **Hybridisms.Client.Native.ServiceDefaults** ([README](Hybridisms.Client.Native.ServiceDefaults/README.md)): Shared service configuration for MAUI (native) clients.
+- **Hybridisms.Client.WebAssembly.ServiceDefaults** ([README](Hybridisms.Client.WebAssembly.ServiceDefaults/README.md)): Shared service configuration for Blazor WebAssembly clients.
 
 ### 8. **ClientStub Projects**
-- **Hybridisms.Client.NativeApp.ClientStub**: Generates strongly-typed settings from Aspire environment variables for the native client.
-- **Hybridisms.Client.WebAssembly.ClientStub**: Generates strongly-typed settings for the WASM client.
+- **Hybridisms.Client.NativeApp.ClientStub** ([README](Hybridisms.Client.NativeApp.ClientStub/README.md)): Generates strongly-typed settings from Aspire environment variables for the native client.
+- **Hybridisms.Client.WebAssembly.ClientStub** ([README](Hybridisms.Client.WebAssembly.ClientStub/README.md)): Generates strongly-typed settings for the WASM client.
 
 ## How the Projects Fit Together
 
