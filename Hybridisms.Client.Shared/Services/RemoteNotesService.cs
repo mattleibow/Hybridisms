@@ -1,19 +1,13 @@
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 
 namespace Hybridisms.Client.Shared.Services;
 
 public class RemoteNotesService(HttpClient httpClient) : INotesService
 {
-    public async IAsyncEnumerable<Notebook> GetNotebooksAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default)
     {
-        await foreach (var notebook in httpClient.GetFromJsonAsAsyncEnumerable<Notebook>("api/notebook").WithCancellation(cancellationToken))
-        {
-            if (notebook is null)
-                continue;
-
-            yield return notebook;
-        }
+        var notebooks = await httpClient.GetFromJsonAsync<ICollection<Notebook>>("api/notebook");
+        return notebooks ?? [];
     }
 
     public async Task<Notebook?> GetNotebookAsync(Guid notebookId, CancellationToken cancellationToken = default)
@@ -21,15 +15,10 @@ public class RemoteNotesService(HttpClient httpClient) : INotesService
         return await httpClient.GetFromJsonAsync<Notebook>($"api/notebook/{notebookId}", cancellationToken);
     }
 
-    public async IAsyncEnumerable<Note> GetNotesAsync(Guid notebookId, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Note>> GetNotesAsync(Guid notebookId, CancellationToken cancellationToken = default)
     {
-        await foreach (var note in httpClient.GetFromJsonAsAsyncEnumerable<Note>($"api/notebook/{notebookId}/notes").WithCancellation(cancellationToken))
-        {
-            if (note is null)
-                continue;
-
-            yield return note;
-        }
+        var notes = await httpClient.GetFromJsonAsync<ICollection<Note>>($"api/notebook/{notebookId}/notes", cancellationToken);
+        return notes ?? [];
     }
 
     public async Task<Note?> GetNoteAsync(Guid noteId, CancellationToken cancellationToken = default)
@@ -37,66 +26,42 @@ public class RemoteNotesService(HttpClient httpClient) : INotesService
         return await httpClient.GetFromJsonAsync<Note>($"api/notes/{noteId}", cancellationToken);
     }
 
-    public async IAsyncEnumerable<Note> GetStarredNotesAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Note>> GetStarredNotesAsync(CancellationToken cancellationToken = default)
     {
-        await foreach (var note in httpClient.GetFromJsonAsAsyncEnumerable<Note>("api/notes/starred").WithCancellation(cancellationToken))
-        {
-            if (note is null)
-                continue;
-
-            yield return note;
-        }
+        var starredNotes = await httpClient.GetFromJsonAsync<ICollection<Note>>("api/notes/starred", cancellationToken);
+        return starredNotes ?? [];
     }
 
-    public async IAsyncEnumerable<Topic> GetTopicsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Topic>> GetTopicsAsync(CancellationToken cancellationToken = default)
     {
-        await foreach (var topic in httpClient.GetFromJsonAsAsyncEnumerable<Topic>("api/topics").WithCancellation(cancellationToken))
-        {
-            if (topic is null)
-                continue;
-
-            yield return topic;
-        }
+        var topics = await httpClient.GetFromJsonAsync<ICollection<Topic>>("api/topics", cancellationToken);
+        return topics ?? [];
     }
 
-    public async IAsyncEnumerable<Notebook> SaveNotebooksAsync(IEnumerable<Notebook> notebooks, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Notebook>> SaveNotebooksAsync(IEnumerable<Notebook> notebooks, CancellationToken cancellationToken = default)
     {
         var response = await httpClient.PostAsJsonAsync("api/notebook", notebooks, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        await foreach (var notebook in response.Content.ReadFromJsonAsAsyncEnumerable<Notebook>(cancellationToken).WithCancellation(cancellationToken))
-        {
-            if (notebook is null)
-                continue;
-
-            yield return notebook;
-        }
+        var savedNotebooks = await response.Content.ReadFromJsonAsync<ICollection<Notebook>>(cancellationToken);
+        return savedNotebooks ?? [];
     }
 
-    public async IAsyncEnumerable<Note> SaveNotesAsync(IEnumerable<Note> notes, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Note>> SaveNotesAsync(IEnumerable<Note> notes, CancellationToken cancellationToken = default)
     {
         var response = await httpClient.PostAsJsonAsync("api/notes", notes, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        await foreach (var note in response.Content.ReadFromJsonAsAsyncEnumerable<Note>(cancellationToken).WithCancellation(cancellationToken))
-        {
-            if (note is null)
-                continue;
-                
-            yield return note;
-        }
+        var savedNotes = await response.Content.ReadFromJsonAsync<ICollection<Note>>(cancellationToken);
+        return savedNotes ?? [];
     }
 
-    public async IAsyncEnumerable<Topic> SaveTopicsAsync(IEnumerable<Topic> topics, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Topic>> SaveTopicsAsync(IEnumerable<Topic> topics, CancellationToken cancellationToken = default)
     {
         var response = await httpClient.PostAsJsonAsync("api/topics", topics, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        await foreach (var topic in response.Content.ReadFromJsonAsAsyncEnumerable<Topic>(cancellationToken).WithCancellation(cancellationToken))
-        {
-            if (topic is null)
-                continue;
-            yield return topic;
-        }
+        var savedTopics = await response.Content.ReadFromJsonAsync<ICollection<Topic>>(cancellationToken);
+        return savedTopics ?? [];
     }
 }

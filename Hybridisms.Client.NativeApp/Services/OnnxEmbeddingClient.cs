@@ -2,7 +2,6 @@ using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.ML.Tokenizers;
 using Microsoft.Extensions.Options;
-using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 
 namespace Hybridisms.Client.NativeApp.Services;
@@ -36,14 +35,14 @@ public class OnnxEmbeddingClient(IOptions<OnnxEmbeddingClient.EmbeddingClientOpt
         return (embeddingSession, tokenizer);
     }
 
-    public async IAsyncEnumerable<(T Match, float Similarity)> GetRankedMatchesAsync<T>(string text, IEnumerable<T> options, Func<T, string> optionTextSelector, int count = 3, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<(T Match, float Similarity)>> GetRankedMatchesAsync<T>(string text, IEnumerable<T> options, Func<T, string> optionTextSelector, int count = 3, CancellationToken cancellationToken = default)
     {
         logger?.LogInformation("Ranking matches for text: {Text}", text);
 
         if (string.IsNullOrWhiteSpace(text))
         {
             logger?.LogWarning("Text is null or empty.");
-            yield break;
+            return [];
         }
 
         var topicEmbeddings = new List<(T Option, Tensor<float> Embedding)>();
@@ -62,7 +61,7 @@ public class OnnxEmbeddingClient(IOptions<OnnxEmbeddingClient.EmbeddingClientOpt
         if (topicEmbeddings.Count == 0)
         {
             logger?.LogWarning("No valid options provided for ranking.");
-            yield break;
+            return [];
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -77,12 +76,7 @@ public class OnnxEmbeddingClient(IOptions<OnnxEmbeddingClient.EmbeddingClientOpt
 
         logger?.LogInformation("Found {Count} ranked matches.", ranked.Count);
 
-        foreach (var item in ranked)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            yield return item;
-        }
+        return ranked;
     }
 
     private async Task<Tensor<float>> GetEmbeddingAsync(string text)

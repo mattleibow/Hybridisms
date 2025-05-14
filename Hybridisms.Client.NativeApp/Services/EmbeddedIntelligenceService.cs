@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Hybridisms.Client.Shared.Services;
 using Hybridisms.Server.WebApp.Services;
 using Microsoft.Extensions.AI;
@@ -7,7 +6,7 @@ namespace Hybridisms.Client.NativeApp.Services;
 
 public class EmbeddedIntelligenceService(EmbeddedNotesService notesService, OnnxChatClient chatClient, OnnxEmbeddingClient embeddingClient) : IIntelligenceService
 {
-    public async IAsyncEnumerable<string> StreamNoteContentsAsync(string prompt, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<string> GenerateNoteContentsAsync(string prompt, CancellationToken cancellationToken = default)
     {
         var systemPrompt = """
             You are a note generator.
@@ -35,28 +34,29 @@ public class EmbeddedIntelligenceService(EmbeddedNotesService notesService, Onnx
             - Item 2
             - Item 3
             """;
-            
-        await foreach (var word in chatClient.GetStreamingResponseAsync(systemPrompt, prompt, 100, cancellationToken).WithCancellation(cancellationToken))
-        {
-            yield return word;
-        }
+
+        var response = await chatClient.GetResponseAsync(systemPrompt, prompt, 100, cancellationToken);
+        
+        return response ?? "";
     }
 
-    public async IAsyncEnumerable<TopicRecommendation> RecommendTopicsAsync(Note note, int count = 3, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<TopicRecommendation>> RecommendTopicsAsync(Note note, int count = 3, CancellationToken cancellationToken = default)
     {
-        var allTopics = new List<Topic>();
-        await foreach (var topic in notesService.GetTopicsAsync(cancellationToken))
-            allTopics.Add(topic);
+        var allTopics = await notesService.GetTopicsAsync(cancellationToken);
 
         var noteText = $"{note.Title}\n{note.Content}";
 
-        await foreach (var (Match, Similarity) in embeddingClient.GetRankedMatchesAsync(noteText, allTopics, t => t.Name, count, cancellationToken).WithCancellation(cancellationToken))
+        var matches = await embeddingClient.GetRankedMatchesAsync(noteText, allTopics, t => t.Name, count, cancellationToken);
+
+        var recommendations = new List<TopicRecommendation>();
+        foreach (var (Match, Similarity) in matches)
         {
-            yield return new TopicRecommendation
+            recommendations.Add(new TopicRecommendation
             {
                 Topic = Match,
                 Reason = $"Matched by semantic similarity (score: {Similarity:F2})"
-            };
+            });
         }
+        return recommendations;
     }
 }

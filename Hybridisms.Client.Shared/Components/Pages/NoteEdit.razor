@@ -51,8 +51,9 @@ else
 
     private List<string> tagNames = [];
     private List<string> availableTags = [];
-    private List<Topic> availableTopicObjects = [];
     private List<string> recommendedTags = [];
+    private ICollection<Topic> availableTopicObjects = [];
+    private ICollection<TopicRecommendation> recommendedTagObjects = [];
     private CancellationTokenSource? debounceCts;
     private bool isGenerating = false;
 
@@ -70,14 +71,8 @@ else
         tagNames = note.Topics.Select(t => t.Name).ToList();
 
         // Load available tags
-        await foreach (var topic in NotesService.GetTopicsAsync())
-        {
-            if (string.IsNullOrWhiteSpace(topic.Name))
-                continue;
-
-            availableTags.Add(topic.Name);
-            availableTopicObjects.Add(topic);
-        }
+        availableTopicObjects = await NotesService.GetTopicsAsync();
+        availableTags = availableTopicObjects.Select(t => t.Name).ToList();
     }
 
     private async Task HandleValidSubmit()
@@ -135,14 +130,8 @@ else
         if (string.IsNullOrWhiteSpace(note?.Title) || string.IsNullOrWhiteSpace(note?.Content))
             return;
 
-        recommendedTags = new List<string>();
-        await foreach (var recommendation in IntelligenceService.RecommendTopicsAsync(note, 3))
-        {
-            if (recommendation?.Topic?.Name is not string name || string.IsNullOrWhiteSpace(name))
-                continue;
-
-            recommendedTags.Add(name);
-        }
+        recommendedTagObjects = await IntelligenceService.RecommendTopicsAsync(note, 3);
+        recommendedTags = recommendedTagObjects.Select(t => t.Topic.Name).ToList();
 
         Console.WriteLine($"Recommended tags: {string.Join(", ", recommendedTags)}");
     }
@@ -157,19 +146,9 @@ else
         try
         {
             var prompt = note.Content;
-
-            var first = true;
-            await foreach (var generated in IntelligenceService.StreamNoteContentsAsync(prompt))
-            {
-                if (first)
-                {
-                    first = false;
-                    note.Content = string.Empty;
-                }
-
-                note.Content += generated;
-                StateHasChanged();
-            }
+            var generated = await IntelligenceService.GenerateNoteContentsAsync(prompt);
+            note.Content = generated;
+            StateHasChanged();
         }
         finally
         {

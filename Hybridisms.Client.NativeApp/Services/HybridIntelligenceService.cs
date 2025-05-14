@@ -1,46 +1,61 @@
-using System.Runtime.CompilerServices;
 using Hybridisms.Client.Shared.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Hybridisms.Client.NativeApp.Services;
 
-public class HybridIntelligenceService(RemoteIntelligenceService remote, EmbeddedIntelligenceService local) : IIntelligenceService
+public class HybridIntelligenceService(RemoteIntelligenceService remote, EmbeddedIntelligenceService local, ILogger<HybridIntelligenceService>? logger) : IIntelligenceService
 {
-    public IAsyncEnumerable<TopicRecommendation> RecommendTopicsAsync(Note note, int count = 3, [EnumeratorCancellation] CancellationToken cancellationToken = default) =>
-        WithLocalFallback(
+    public Task<ICollection<TopicRecommendation>> RecommendTopicsAsync(Note note, int count = 3, CancellationToken cancellationToken = default)
+    {
+        logger?.LogInformation("Recommending topics for note with ID: {NoteId}", note.Id);
+
+        return WithLocalFallback(
             ct => remote.RecommendTopicsAsync(note, count, ct),
             ct => local.RecommendTopicsAsync(note, count, ct),
             cancellationToken);
+    }
 
-    public IAsyncEnumerable<string> StreamNoteContentsAsync(string prompt, [EnumeratorCancellation] CancellationToken cancellationToken = default) =>
-        WithLocalFallback(
-            ct => remote.StreamNoteContentsAsync(prompt, ct),
-            ct => local.StreamNoteContentsAsync(prompt, ct),
-            cancellationToken);
-
-    private async IAsyncEnumerable<T> WithLocalFallback<T>(
-        Func<CancellationToken, IAsyncEnumerable<T>> remoteFunc,
-        Func<CancellationToken, IAsyncEnumerable<T>> localFunc,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public Task<string> GenerateNoteContentsAsync(string prompt, CancellationToken cancellationToken = default)
     {
-        var results = new List<T>();
+        logger?.LogInformation("Streaming note contents with prompt: {Prompt}", prompt);
+        
+        return WithLocalFallback(
+            ct => remote.GenerateNoteContentsAsync(prompt, ct),
+            ct => local.GenerateNoteContentsAsync(prompt, ct),
+            cancellationToken);
+    }
+
+    private async Task<ICollection<T>> WithLocalFallback<T>(
+        Func<CancellationToken, Task<ICollection<T>>> remoteFunc,
+        Func<CancellationToken, Task<ICollection<T>>> localFunc,
+        CancellationToken cancellationToken = default)
+    {
         try
         {
-            await foreach (var item in remoteFunc(cancellationToken).WithCancellation(cancellationToken))
-            {
-                results.Add(item);
-            }
+            var results = await remoteFunc(cancellationToken);
+            return results;
         }
         catch
         {
-            results.Clear();
-            await foreach (var item in localFunc(cancellationToken).WithCancellation(cancellationToken))
-            {
-                results.Add(item);
-            }
+            var results = await localFunc(cancellationToken);
+            return results;
         }
-        foreach (var item in results)
+    }
+    
+    private async Task<T> WithLocalFallback<T>(
+        Func<CancellationToken, Task<T>> remoteFunc,
+        Func<CancellationToken, Task<T>> localFunc,
+        CancellationToken cancellationToken = default)
+    {
+        try
         {
-            yield return item;
+            var results = await remoteFunc(cancellationToken);
+            return results;
+        }
+        catch
+        {
+            var results = await localFunc(cancellationToken);
+            return results;
         }
     }
 }

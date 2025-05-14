@@ -66,7 +66,7 @@ else
 
     private Notebook? notebook;
     private string? notebookTitle = "Notes";
-    private List<Note>? notes;
+    private ICollection<Note>? notes;
     private bool notebookNotFound;
 
     protected override async Task OnInitializedAsync()
@@ -81,13 +81,6 @@ else
         }
 
         notebookTitle = notebook.Title;
-        StateHasChanged();
-
-        notes = new List<Note>();
-        await foreach (var note in NotesService.GetNotesAsync(notebook.Id))
-        {
-            notes.Add(note);
-            StateHasChanged();
-        }
+        notes = await NotesService.GetNotesAsync(notebook.Id);
     }
 }

@@ -51,15 +51,10 @@
 </div>
 
 @code {
-    private List<Notebook>? notebooks;
+    private ICollection<Notebook>? notebooks;
 
     protected override async Task OnInitializedAsync()
     {
-        notebooks = new List<Notebook>();
-        await foreach (var notebook in NotesService.GetNotebooksAsync())
-        {
-            notebooks.Add(notebook);
-            StateHasChanged();
-        }
+        notebooks = await NotesService.GetNotebooksAsync();
     }
 }

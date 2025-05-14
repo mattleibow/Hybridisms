@@ -10,22 +10,14 @@ public class TopicsController(INotesService noteService) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetTopics()
     {
-        var topics = new List<Topic>();
-        await foreach (var topic in noteService.GetTopicsAsync())
-        {
-            topics.Add(topic);
-        }
+        var topics = await noteService.GetTopicsAsync();
         return Ok(topics);
     }
 
     [HttpPost]
     public async Task<IActionResult> SaveTopics([FromBody] IEnumerable<Topic> topics)
     {
-        var saved = new List<Topic>();
-        await foreach (var topic in noteService.SaveTopicsAsync(topics))
-        {
-            saved.Add(topic);
-        }
+        var saved = await noteService.SaveTopicsAsync(topics);
         return Ok(saved);
     }
 }

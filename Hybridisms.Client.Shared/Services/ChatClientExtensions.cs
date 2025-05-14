@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.AI;
 
@@ -7,7 +5,7 @@ namespace Hybridisms.Server.WebApp.Services;
 
 public static class ChatClientExtensions
 {
-    public static async IAsyncEnumerable<string> GetStreamingResponseAsync(this IChatClient chatClient, string systemPrompt, string userPrompt, int? maxOutputTokens = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public static async Task<string> GetResponseAsync(this IChatClient chatClient, string systemPrompt, string userPrompt, int? maxOutputTokens = null, CancellationToken cancellationToken = default)
     {
         var chatHistory = new List<ChatMessage>
         {
@@ -19,20 +17,10 @@ public static class ChatClientExtensions
         {
             MaxOutputTokens = maxOutputTokens
         };
-        await foreach (var update in chatClient.GetStreamingResponseAsync(chatHistory, options, cancellationToken))
-        {
-            yield return update.Text;
-        }
-    }
 
-    public static async Task<string> GetResponseAsync(this IChatClient chatClient, string systemPrompt, string userPrompt, int? maxOutputTokens = null, CancellationToken cancellationToken = default)
-    {
-        var sb = new StringBuilder();
-        await foreach (var update in chatClient.GetStreamingResponseAsync(systemPrompt, userPrompt, maxOutputTokens, cancellationToken).WithCancellation(cancellationToken))
-        {
-            sb.Append(update ?? "");
-        }
-        return sb.ToString();
+        var response = await chatClient.GetResponseAsync(chatHistory, options, cancellationToken);
+
+        return response.Text ?? "";
     }
 
     public static async Task<T?> GetResponseAsync<T>(this IChatClient chatClient, string systemPrompt, string userPrompt, int? maxOutputTokens = null, CancellationToken cancellationToken = default)

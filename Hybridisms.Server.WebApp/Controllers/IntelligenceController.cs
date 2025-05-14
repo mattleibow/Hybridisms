@@ -11,22 +11,14 @@ public class IntelligenceController(IIntelligenceService intelligenceService) : 
     [HttpPost("recommend-topics")]
     public async Task<ActionResult> RecommendTopics([FromQuery] int count, [FromBody] Note note)
     {
-        var recommendations = new List<TopicRecommendation>();
-        await foreach (var recommendation in intelligenceService.RecommendTopicsAsync(note, count))
-        {
-            recommendations.Add(recommendation);
-        }
+        var recommendations = await intelligenceService.RecommendTopicsAsync(note, count);
         return Ok(recommendations);
     }
 
-    [HttpPost("stream-note-contents")]
-    public async Task<ActionResult> StreamNoteContents([FromBody] string prompt)
+    [HttpPost("generate-note-contents")]
+    public async Task<ActionResult> GenerateNoteContents([FromBody] string prompt)
     {
-        var sb = new StringBuilder();
-        await foreach (var content in intelligenceService.StreamNoteContentsAsync(prompt))
-        {
-            sb.Append(content);
-        }
-        return Ok(sb.ToString());
+        var response = await intelligenceService.GenerateNoteContentsAsync(prompt);
+        return Ok(response);
     }
 }

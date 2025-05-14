@@ -47,15 +47,10 @@ else
 }
 
 @code {
-    private IList<Note>? notes;
+    private ICollection<Note>? notes;
 
     protected override async Task OnInitializedAsync()
     {
-        notes = new List<Note>();
-        await foreach (var note in NotesService.GetStarredNotesAsync())
-        {
-            notes.Add(note);
-            StateHasChanged();
-        }
+        notes = await NotesService.GetStarredNotesAsync();
     }
 }

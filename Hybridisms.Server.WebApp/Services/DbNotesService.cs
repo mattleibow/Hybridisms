@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Hybridisms.Client.Shared.Services;
 using Hybridisms.Server.WebApp.Data;
 using Microsoft.EntityFrameworkCore;
@@ -7,16 +6,16 @@ namespace Hybridisms.Server.WebApp.Services;
 
 public class DbNotesService(HybridismsDbContext db) : INotesService
 {
-    public async IAsyncEnumerable<Notebook> GetNotebooksAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default)
     {
         var entities = await db.Notebooks
             .ToListAsync(cancellationToken);
 
-        foreach (var entity in entities)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return MapNotebook(entity);
-        }
+        var mapped = entities
+            .Select(MapNotebook)
+            .ToList();
+            
+        return mapped;
     }
 
     public async Task<Notebook?> GetNotebookAsync(Guid notebookId, CancellationToken cancellationToken = default)
@@ -30,7 +29,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         return MapNotebook(entity);
     }
 
-    public async IAsyncEnumerable<Notebook> SaveNotebooksAsync(IEnumerable<Notebook> notebooks, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Notebook>> SaveNotebooksAsync(IEnumerable<Notebook> notebooks, CancellationToken cancellationToken = default)
     {
         var savedNotebooks = new List<Notebook>();
         foreach (var notebook in notebooks)
@@ -38,11 +37,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
             var updatedNotebook = await SaveNotebookAsync(notebook, cancellationToken);
             savedNotebooks.Add(updatedNotebook);
         }
-        foreach (var savedNotebook in savedNotebooks)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return savedNotebook;
-        }
+        return savedNotebooks;
     }
 
     private async Task<Notebook> SaveNotebookAsync(Notebook notebook, CancellationToken cancellationToken)
@@ -77,18 +72,18 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         return notebook;
     }
 
-    public async IAsyncEnumerable<Note> GetNotesAsync(Guid notebookId, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Note>> GetNotesAsync(Guid notebookId, CancellationToken cancellationToken = default)
     {
         var notes = await db.Notes
             .Where(n => n.NotebookId == notebookId)
             .Include(n => n.Topics)
             .ToListAsync(cancellationToken);
 
-        foreach (var note in notes)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return MapNote(note);
-        }
+        var mapped = notes
+            .Select(MapNote)
+            .ToList();
+            
+        return mapped;
     }
 
     public async Task<Note?> GetNoteAsync(Guid noteId, CancellationToken cancellationToken = default)
@@ -103,34 +98,33 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         return (Note?)MapNote(entity);
     }
 
-    public async IAsyncEnumerable<Note> GetStarredNotesAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Note>> GetStarredNotesAsync(CancellationToken cancellationToken = default)
     {
         var notes = await db.Notes
             .Where(n => n.Starred)
             .Include(n => n.Topics)
             .ToListAsync(cancellationToken);
 
-        foreach (var note in notes)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return MapNote(note);
-        }
+        var mapped = notes
+            .Select(MapNote)
+            .ToList();
+
+        return mapped;
     }
 
-    public async IAsyncEnumerable<Topic> GetTopicsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Topic>> GetTopicsAsync(CancellationToken cancellationToken = default)
     {
         var topics = await db.Topics
             .ToListAsync(cancellationToken);
 
-        foreach (var topic in topics)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
+        var mapped = topics
+            .Select(MapTopic)
+            .ToList();
 
-            yield return MapTopic(topic);
-        }
+        return mapped;
     }
 
-    public async IAsyncEnumerable<Note> SaveNotesAsync(IEnumerable<Note> notes, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Note>> SaveNotesAsync(IEnumerable<Note> notes, CancellationToken cancellationToken = default)
     {
         var savedNotes = new List<Note>();
         foreach (var note in notes)
@@ -138,11 +132,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
             var updatedNote = await SaveNoteAsync(note, cancellationToken);
             savedNotes.Add(updatedNote);
         }
-        foreach (var savedNote in savedNotes)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return savedNote;
-        }
+        return savedNotes;
     }
 
     private async Task<Note> SaveNoteAsync(Note note, CancellationToken cancellationToken)
@@ -168,7 +158,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         return note;
     }
 
-    public async IAsyncEnumerable<Topic> SaveTopicsAsync(IEnumerable<Topic> topics, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<Topic>> SaveTopicsAsync(IEnumerable<Topic> topics, CancellationToken cancellationToken = default)
     {
         var savedTopics = new List<Topic>();
         foreach (var topic in topics)
@@ -176,11 +166,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
             var updatedTopic = await SaveTopicAsync(topic, cancellationToken);
             savedTopics.Add(updatedTopic);
         }
-        foreach (var savedTopic in savedTopics)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            yield return savedTopic;
-        }
+        return savedTopics;
     }
 
     private async Task<Topic> SaveTopicAsync(Topic topic, CancellationToken cancellationToken)

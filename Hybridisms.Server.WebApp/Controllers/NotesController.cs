@@ -10,11 +10,7 @@ public class NotesController(INotesService noteService) : ControllerBase
     [HttpGet("starred")]
     public async Task<IActionResult> GetStarredNotes()
     {
-        var notes = new List<Note>();
-        await foreach (var note in noteService.GetStarredNotesAsync())
-        {
-            notes.Add(note);
-        }
+        var notes = await noteService.GetStarredNotesAsync();
         return Ok(notes);
     }
 
@@ -30,11 +26,7 @@ public class NotesController(INotesService noteService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> SaveNotes([FromBody] IEnumerable<Note> notes)
     {
-        var savedNotes = new List<Note>();
-        await foreach (var note in noteService.SaveNotesAsync(notes))
-        {
-            savedNotes.Add(note);
-        }
+        var savedNotes = await noteService.SaveNotesAsync(notes);
         return Ok(savedNotes);
     }
 }

@@ -1,33 +1,26 @@
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 
 namespace Hybridisms.Client.Shared.Services;
 
 public class RemoteIntelligenceService(HttpClient httpClient) : IIntelligenceService
 {
-    public async IAsyncEnumerable<TopicRecommendation> RecommendTopicsAsync(Note note, int count = 3, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<ICollection<TopicRecommendation>> RecommendTopicsAsync(Note note, int count = 3, CancellationToken cancellationToken = default)
     {
         var response = await httpClient.PostAsJsonAsync($"api/intelligence/recommend-topics?count={count}", note, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        await foreach (var recommendation in response.Content.ReadFromJsonAsAsyncEnumerable<TopicRecommendation>().WithCancellation(cancellationToken))
-        {
-            if (recommendation is null)
-                continue;
-
-            yield return recommendation;
-        }
+        var recommendations = await response.Content.ReadFromJsonAsync<ICollection<TopicRecommendation>>();
+        
+        return recommendations ?? [];
     }
 
-    public async IAsyncEnumerable<string> StreamNoteContentsAsync(string prompt, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async Task<string> GenerateNoteContentsAsync(string prompt, CancellationToken cancellationToken = default)
     {
-        var response = await httpClient.PostAsJsonAsync($"api/intelligence/stream-note-contents", prompt, cancellationToken);
+        var response = await httpClient.PostAsJsonAsync($"api/intelligence/generate-note-contents", prompt, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        var contents = await response.Content.ReadAsStringAsync(cancellationToken);
-        if (string.IsNullOrWhiteSpace(contents))
-            yield break;
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        yield return contents;
+        return content ?? "";
     }
 }
