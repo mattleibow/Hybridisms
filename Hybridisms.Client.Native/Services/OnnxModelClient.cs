@@ -1,11 +1,10 @@
 using System.IO.Compression;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Hybridisms.Client.Native.Services;
 
 namespace Hybridisms.Client.Native.Services;
 
-public abstract class OnnxModelClient<TOptions>(IOptions<TOptions> options, ILogger<OnnxModelClient<TOptions>>? logger, IAppFileProvider fileProvider) : object
+public abstract class OnnxModelClient<TOptions>(IAppFileProvider fileProvider, IOptions<TOptions> options, ILogger<OnnxModelClient<TOptions>>? logger) : object
     where TOptions : OnnxModelClient<TOptions>.OnnxModelClientOptions
 {
     private readonly SemaphoreSlim isModelReadyLock = new(1, 1);

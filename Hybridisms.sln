@@ -7,15 +7,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Server.WebApp", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Client.WebAssembly", "Hybridisms.Client.WebAssembly\Hybridisms.Client.WebAssembly.csproj", "{29D8C60F-BACB-4D23-98A2-38D4F4760849}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Client.Shared", "Hybridisms.Client.Shared\Hybridisms.Client.Shared.csproj", "{3DA52845-F7C7-448D-89C2-53BA4F1D6620}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Shared", "Hybridisms.Shared\Hybridisms.Shared.csproj", "{3DA52845-F7C7-448D-89C2-53BA4F1D6620}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Server.Shared", "Hybridisms.Server.Shared\Hybridisms.Server.Shared.csproj", "{979BE802-C92E-461B-93BD-E46E7F417676}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Hosting", "Hybridisms.Hosting\Hybridisms.Hosting.csproj", "{979BE802-C92E-461B-93BD-E46E7F417676}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Client.NativeApp", "Hybridisms.Client.NativeApp\Hybridisms.Client.NativeApp.csproj", "{FCAC9F44-CC96-482A-8ECA-B84F8266CF7E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.AppHost", "Hybridisms.AppHost\Hybridisms.AppHost.csproj", "{045B1FC6-FB45-4CFE-9BD0-EE70EC2C1B6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Server.Web.ServiceDefaults", "Hybridisms.Server.Web.ServiceDefaults\Hybridisms.Server.Web.ServiceDefaults.csproj", "{065A12A8-FEB9-0EB7-6B5B-218F280C5AC2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Server.ServiceDefaults", "Hybridisms.Server.ServiceDefaults\Hybridisms.Server.ServiceDefaults.csproj", "{065A12A8-FEB9-0EB7-6B5B-218F280C5AC2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Client.Native.ServiceDefaults", "Hybridisms.Client.Native.ServiceDefaults\Hybridisms.Client.Native.ServiceDefaults.csproj", "{886B3D91-4AAB-8772-4FBC-C280F7EF30BD}"
 EndProject
@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Client.WebAssemb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Client.Native", "Hybridisms.Client.Native\Hybridisms.Client.Native.csproj", "{F6D543F8-583C-45CB-BF95-9D5039F96E22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Server.Web", "Hybridisms.Server.Web\Hybridisms.Server.Web.csproj", "{BBA0C1BE-40AC-4DFD-8F8E-E61FF105B76F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hybridisms.Server", "Hybridisms.Server\Hybridisms.Server.csproj", "{BBA0C1BE-40AC-4DFD-8F8E-E61FF105B76F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

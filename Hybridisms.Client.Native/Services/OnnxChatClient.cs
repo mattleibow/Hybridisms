@@ -7,8 +7,8 @@ using System.Text;
 
 namespace Hybridisms.Client.Native.Services;
 
-public class OnnxChatClient(IOptions<OnnxChatClient.ChatClientOptions> options, ILogger<OnnxChatClient>? logger)
-    : OnnxModelClient<OnnxChatClient.ChatClientOptions>(options, logger), IChatClient
+public class OnnxChatClient(IAppFileProvider fileProvider, IOptions<OnnxChatClient.ChatClientOptions> options, ILogger<OnnxChatClient>? logger)
+    : OnnxModelClient<OnnxChatClient.ChatClientOptions>(fileProvider, options, logger), IChatClient
 {
     private OnnxRuntimeGenAIChatClient? loadedClient;
 

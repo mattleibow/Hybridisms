@@ -12,7 +12,7 @@ This project is the .NET MAUI (native) client for the Hybridisms suite. It provi
 - **Local Database**: Uses SQLite for offline data storage.
 - **Hybrid Services**: Combines local and remote services for notes and intelligence.
 - **ONNX AI Integration**: Supports local AI models for embeddings and chat.
-- **Reusable Components**: Shares UI and logic with Blazor web client via Hybridisms.Client.Shared.
+- **Reusable Components**: Shares UI and logic with Blazor web client via Hybridisms.Shared.
 
 ## Structure
 - **Components/**: Blazor UI components for the native app.

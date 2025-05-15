@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Hybridisms.Client.Native.Services;
 
-public class OnnxEmbeddingClient(IOptions<OnnxEmbeddingClient.EmbeddingClientOptions> options, ILogger<OnnxEmbeddingClient>? logger)
-    : OnnxModelClient<OnnxEmbeddingClient.EmbeddingClientOptions>(options, logger)
+public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmbeddingClient.EmbeddingClientOptions> options, ILogger<OnnxEmbeddingClient>? logger)
+    : OnnxModelClient<OnnxEmbeddingClient.EmbeddingClientOptions>(fileProvider, options, logger)
 {
     private BertTokenizer? tokenizer;
     private InferenceSession? embeddingSession;

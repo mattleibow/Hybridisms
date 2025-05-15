@@ -1,4 +1,4 @@
-﻿using Hybridisms.Client.Shared.Services;
+﻿using Hybridisms.Shared.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;

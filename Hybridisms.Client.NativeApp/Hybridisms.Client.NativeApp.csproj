@@ -54,8 +54,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Hybridisms.Client.Native.ServiceDefaults\Hybridisms.Client.Native.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\Hybridisms.Client.Shared\Hybridisms.Client.Shared.csproj" />
-    <ProjectReference Include="..\Hybridisms.Server.Shared\Hybridisms.Server.Shared.csproj" />
+    <ProjectReference Include="..\Hybridisms.Shared\Hybridisms.Shared.csproj" />
+    <ProjectReference Include="..\Hybridisms.Hosting\Hybridisms.Hosting.csproj" />
     <ProjectReference Include="..\Hybridisms.Client.Native\Hybridisms.Client.Native.csproj" />
   </ItemGroup>
 

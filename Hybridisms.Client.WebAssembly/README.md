@@ -9,7 +9,7 @@ This project is the Blazor WebAssembly client for the Hybridisms suite. It provi
 ## Key Features
 - **Blazor WebAssembly UI**: Runs entirely in the browser using WebAssembly.
 - **Remote Services**: Uses HTTP APIs to interact with the backend for notes and intelligence.
-- **Reusable Components**: Shares UI and logic with the native client via Hybridisms.Client.Shared.
+- **Reusable Components**: Shares UI and logic with the native client via Hybridisms.Shared.
 
 ## Structure
 - **wwwroot/**: Static web assets.

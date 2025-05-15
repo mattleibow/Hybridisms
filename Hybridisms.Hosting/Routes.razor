@@ -1,0 +1,8 @@
+﻿<Router
+    AppAssembly="typeof(Hybridisms.Hosting.Components.Layout.MainLayout).Assembly"
+    AdditionalAssemblies="new[] { typeof(Hybridisms.Hosting._Imports).Assembly, typeof(Hybridisms.Shared._Imports).Assembly }">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Hybridisms.Hosting.Components.Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>

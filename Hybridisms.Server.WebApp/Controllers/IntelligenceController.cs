@@ -1,5 +1,5 @@
 using System.Text;
-using Hybridisms.Client.Shared.Services;
+using Hybridisms.Shared.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hybridisms.Server.WebApp.Controllers;

@@ -24,7 +24,7 @@ The Hybridisms solution is composed of several projects, each with a specific ro
 - **Role:**
   - Runs entirely in the browser using WebAssembly.
   - Connects to the backend server for data and AI features.
-  - Shares UI and logic with the native client via `Hybridisms.Client.Shared`.
+  - Shares UI and logic with the native client via `Hybridisms.Shared`.
 
 ### 4. **Hybridisms.Client.NativeApp** ([README](Hybridisms.Client.NativeApp/README.md))
 - **Purpose:** The .NET MAUI (native) client for cross-platform mobile and desktop use.
@@ -32,22 +32,22 @@ The Hybridisms solution is composed of several projects, each with a specific ro
   - Delivers a native app experience on Windows, macOS, Android, and iOS.
   - Supports offline data storage and hybrid cloud/local operation.
   - Integrates ONNX models for local AI features when available.
-  - Shares UI and logic with the web client via `Hybridisms.Client.Shared`.
+  - Shares UI and logic with the web client via `Hybridisms.Shared`.
 
-### 5. **Hybridisms.Client.Shared** ([README](Hybridisms.Client.Shared/README.md))
+### 5. **Hybridisms.Shared** ([README](Hybridisms.Shared/README.md))
 - **Purpose:** Shared business logic, data models, and Blazor UI components for both web and native clients.
 - **Role:**
   - Defines models for notes, notebooks, and topics.
   - Provides service interfaces and remote/local implementations.
   - Supplies reusable Blazor components and utilities for hybrid rendering.
 
-### 6. **Hybridisms.Server.Shared** ([README](Hybridisms.Server.Shared/README.md))
+### 6. **Hybridisms.Hosting** ([README](Hybridisms.Hosting/README.md))
 - **Purpose:** Shared code, components, and resources for server-side projects.
 - **Role:**
   - Provides reusable Blazor components and shared logic for server-side applications.
 
 ### 7. **ServiceDefaults Projects**
-- **Hybridisms.Server.Web.ServiceDefaults** ([README](Hybridisms.Server.Web.ServiceDefaults/README.md)): Shared service configuration and extension methods for server-side projects (e.g., service discovery, resilience, health checks, OpenTelemetry).
+- **Hybridisms.Server.ServiceDefaults** ([README](Hybridisms.Server.ServiceDefaults/README.md)): Shared service configuration and extension methods for server-side projects (e.g., service discovery, resilience, health checks, OpenTelemetry).
 - **Hybridisms.Client.Native.ServiceDefaults** ([README](Hybridisms.Client.Native.ServiceDefaults/README.md)): Shared service configuration for MAUI (native) clients.
 - **Hybridisms.Client.WebAssembly.ServiceDefaults** ([README](Hybridisms.Client.WebAssembly.ServiceDefaults/README.md)): Shared service configuration for Blazor WebAssembly clients.
 

@@ -22,11 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Hybridisms.Server.Shared\Hybridisms.Server.Shared.csproj" />
-    <ProjectReference Include="..\Hybridisms.Client.Shared\Hybridisms.Client.Shared.csproj" />
+    <ProjectReference Include="..\Hybridisms.Hosting\Hybridisms.Hosting.csproj" />
+    <ProjectReference Include="..\Hybridisms.Shared\Hybridisms.Shared.csproj" />
     <ProjectReference Include="..\Hybridisms.Client.WebAssembly\Hybridisms.Client.WebAssembly.csproj" />
-    <ProjectReference Include="..\Hybridisms.Server.Web.ServiceDefaults\Hybridisms.Server.Web.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\Hybridisms.Server.Web\Hybridisms.Server.Web.csproj" />
+    <ProjectReference Include="..\Hybridisms.Server.ServiceDefaults\Hybridisms.Server.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\Hybridisms.Server\Hybridisms.Server.csproj" />
   </ItemGroup>
 
 </Project>

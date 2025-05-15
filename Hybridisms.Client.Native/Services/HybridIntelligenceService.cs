@@ -1,4 +1,4 @@
-using Hybridisms.Client.Shared.Services;
+using Hybridisms.Shared.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Hybridisms.Client.Native.Services;

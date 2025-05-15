@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Hybridisms.Client.Shared\Hybridisms.Client.Shared.csproj" />
+    <ProjectReference Include="..\Hybridisms.Shared\Hybridisms.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

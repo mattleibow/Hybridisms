@@ -1,4 +1,4 @@
-using Hybridisms.Client.Shared.Services;
+using Hybridisms.Shared.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Hosting;
 

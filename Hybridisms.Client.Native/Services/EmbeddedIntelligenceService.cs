@@ -1,5 +1,4 @@
-using Hybridisms.Client.Shared.Services;
-using Hybridisms.Server.WebApp.Services;
+using Hybridisms.Shared.Services;
 using Microsoft.Extensions.AI;
 
 namespace Hybridisms.Client.Native.Services;

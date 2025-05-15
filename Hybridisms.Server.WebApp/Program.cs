@@ -1,6 +1,6 @@
-using Hybridisms.Client.Shared.Services;
-using Hybridisms.Server.Web.Data;
-using Hybridisms.Server.Web.Services;
+using Hybridisms.Shared.Services;
+using Hybridisms.Server.Data;
+using Hybridisms.Server.Services;
 using Hybridisms.Server.WebApp.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
@@ -62,8 +62,8 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(Hybridisms.Server.Shared._Imports).Assembly)
-    .AddAdditionalAssemblies(typeof(Hybridisms.Client.Shared._Imports).Assembly)
+    .AddAdditionalAssemblies(typeof(Hybridisms.Hosting._Imports).Assembly)
+    .AddAdditionalAssemblies(typeof(Hybridisms.Shared._Imports).Assembly)
     .AddAdditionalAssemblies(typeof(Hybridisms.Client.WebAssembly._Imports).Assembly);
 
 // Map controller endpoints

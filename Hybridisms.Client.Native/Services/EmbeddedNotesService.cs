@@ -1,5 +1,5 @@
 using Hybridisms.Client.Native.Data;
-using Hybridisms.Client.Shared.Services;
+using Hybridisms.Shared.Services;
 
 namespace Hybridisms.Client.Native.Services;
 
