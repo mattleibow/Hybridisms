@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.AI;
 
-namespace Hybridisms.Server.WebApp.Services;
+namespace Hybridisms.Client.Shared.Services;
 
 public static class ChatClientExtensions
 {

@@ -16,8 +16,12 @@ ai.AddDeployment(
     modelName: "gpt-4o-mini",
     modelVersion: "2024-07-18");
 
+var sqlite = builder.AddSqlite("db")
+    .WithSqliteWeb();
+
 var web = builder.AddProject<Projects.Hybridisms_Server_WebApp>("webapp")
-    .WithReference(ai);
+    .WithReference(ai)
+    .WithReference(sqlite);
 
 if (builder.ExecutionContext.IsRunMode)
 {

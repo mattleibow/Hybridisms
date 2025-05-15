@@ -15,6 +15,7 @@
 		<PackageReference Include="Aspire.Hosting.AppHost" />
 		<PackageReference Include="Aspire.Hosting.Azure.CognitiveServices" />
 		<PackageReference Include="AspireMobile.Hosting" />
+		<PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" />
 		<PackageReference Include="Microsoft.Extensions.AI" />
 		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
 		<PackageReference Include="Aspire.Azure.AI.OpenAI" />

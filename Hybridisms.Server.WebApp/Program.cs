@@ -1,6 +1,7 @@
 using Hybridisms.Client.Shared.Services;
 using Hybridisms.Server.Web.Data;
 using Hybridisms.Server.Web.Services;
+using Hybridisms.Server.WebApp.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 
@@ -15,7 +16,7 @@ builder.Services.AddRazorComponents()
 
 // Add EF Core DbContext with SQLite
 builder.Services.AddDbContext<HybridismsDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Hybridisms")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("db")));
 
 // Add controller services
 builder.Services.AddControllers();
