@@ -1,19 +1,29 @@
 # Hybridisms.Shared
 
-This project provides shared client-side logic, models, and UI components for the Hybridisms application suite. It is designed to be used by both Blazor WebAssembly and .NET MAUI (native) clients, enabling code reuse and consistent behavior across platforms.
+This project is the cornerstone of the Hybridisms demo's hybrid strategy. It provides shared client-side logic, models, and UI components that work across Blazor WebAssembly (browser) and .NET MAUI (native) platforms, demonstrating how to maximize code sharing in hybrid applications.
 
-## Purpose
+## Hybrid Techniques Demonstrated
 
-- **Centralizes** business logic, data models, and reusable UI components for notes, notebooks, and topics.
-- **Defines** service interfaces and remote service implementations for accessing and managing notes and AI-powered features.
-- **Enables** hybrid rendering and platform-agnostic UI with Blazor components.
+- **Write Once, Run Anywhere UI**: Blazor components that work in both web and native environments
+- **Adaptive Rendering**: `HybridRenderMode` utility that selects the appropriate render mode based on runtime capabilities
+- **Common Service Abstractions**: Interface-based design that allows for platform-specific implementations while maintaining a consistent API
+- **Shared Domain Model**: Single set of models used across all platforms
 
-## Key Features
+## Key Hybrid Features
 
-- **Data Models**: Strongly-typed models for notes, notebooks, and topics, supporting metadata, relationships, and change tracking.
-- **Service Interfaces**: Abstractions for notes and intelligence (AI) services, with remote HTTP implementations.
-- **Reusable Components**: Blazor components for editing and displaying notes, notebooks, and topics.
-- **Hybrid Render Mode**: Utilities for supporting both server and WebAssembly rendering.
+- **HybridRenderMode**: Core utility that adapts rendering based on available runtime features:
+  ```csharp
+  // Use in Razor components like this:
+  @renderMode="@HybridRenderMode.InteractiveAuto"
+  ```
+  
+- **Service Interfaces**: Platform-agnostic interfaces that enable swappable implementations:
+  - `INotesService`: For data operations across any platform
+  - `IIntelligenceService`: For AI features that work both in the cloud and on-device
+
+- **Remote Implementations**: HTTP-based service implementations for web scenarios
+  
+- **Cross-Platform UI Components**: Blazor components that adapt to where they're running
 
 ## Structure
 
@@ -49,17 +59,37 @@ This project provides shared client-side logic, models, and UI components for th
 ### Utilities
 - **HybridRenderMode**: Utility for selecting the appropriate Blazor render mode (server, WASM, or auto) based on runtime support.
 
-## How It Works
+## How the Hybrid Pattern Works
 
-- **Data Flow**: UI components interact with service interfaces (`INotesService`, `IIntelligenceService`). These are typically implemented by remote HTTP services, but can be swapped for local or hybrid implementations in platform-specific projects.
-- **AI Integration**: The `IIntelligenceService` interface and its remote implementation enable features like topic recommendations and content generation using backend AI models.
-- **Component Reuse**: All Blazor components in this project are designed to be used in both web and native (MAUI) clients.
+### Adaptive Rendering
+The `HybridRenderMode` class demonstrates how to select the appropriate rendering strategy based on the runtime environment:
 
-## Usage
+```csharp
+public static class HybridRenderMode
+{
+    // Different render modes for different environments
+    public static IComponentRenderMode? InteractiveServer { get; } = IfSupported(RenderMode.InteractiveServer);
+    public static IComponentRenderMode? InteractiveAuto { get; } = IfSupported(RenderMode.InteractiveAuto);
+    public static IComponentRenderMode? InteractiveWebAssembly { get; } = IfSupported(RenderMode.InteractiveWebAssembly);
 
-- Reference this project from your Blazor or MAUI client projects.
-- Register the appropriate service implementations (remote, local, or hybrid) in your client app's dependency injection setup.
-- Use the provided components and models to build consistent, cross-platform UIs for notes, notebooks, and topics.
+    // Checks if the current environment supports the requested render mode
+    private static IComponentRenderMode? IfSupported(IComponentRenderMode? mode) =>
+        !AppContext.TryGetSwitch("Hybridisms.SupportsRenderMode", out var isEnabled) || isEnabled ? mode : null;
+}
+```
+
+### Platform-Agnostic Service Design
+Services are designed with interfaces that can be implemented differently for each platform:
+
+- **Web Client**: Uses `RemoteNotesService` and `RemoteIntelligenceService` to call APIs
+- **Native Client**: Can use `EmbeddedNotesService` for offline or `HybridNotesService` for mixed operation
+
+### Implementing Your Own Hybrid Apps
+
+1. **Reference this approach**: Study how the shared components and services are designed
+2. **Use the interface pattern**: Define capabilities as interfaces with multiple implementations
+3. **Leverage HybridRenderMode**: Adapt your UI based on the runtime environment
+4. **Create hybrid services**: Implement services that can work both online and offline
 
 ---
 

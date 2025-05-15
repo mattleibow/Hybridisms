@@ -1,15 +1,22 @@
 # Hybridisms.Client.WebAssembly.ClientStub
 
-This project is a stub for generating configuration settings for the Blazor WebAssembly client in the Hybridisms suite.
+This project demonstrates how to bridge the configuration gap between Aspire distributed applications and Blazor WebAssembly clients. It's a key component of the hybrid application pattern, enabling consistent configuration across web and native clients.
 
-## Purpose
-- Generates strongly-typed settings from Aspire environment variables for use in the WASM client.
+## Hybrid Technique Demonstrated
+- **Configuration Bridge Pattern**: Converting Aspire environment settings to WebAssembly-compatible configuration
+- **Build-Time Settings Generation**: Creating static settings that can be embedded in the browser-based client
 
-## Key Features
-- **Settings Generator**: Uses AspireMobile.SettingsGenerator to create configuration files.
+## How the Hybrid Configuration Bridge Works
+- **Aspire Integration**: The stub project is configured in the Aspire application model
+- **Environment Variables**: Aspire provides service URLs and other settings as environment variables
+- **Settings Generation**: The stub converts these to a C# settings file that works in the browser context
+- **Unified Configuration**: Both WebAssembly and native clients get settings from the same source
 
-## Usage
-- Run this project to generate or update the settings file for the Blazor WebAssembly client.
+## Implementing This Pattern in Your Hybrid Apps
+1. Create stub projects for both WebAssembly and native clients
+2. Configure them in your Aspire AppHost
+3. Access the same services with consistent configuration in both contexts
+4. Benefit from service discovery and configuration changes without duplicating settings
 
 ---
-*This README was generated automatically to describe the structure and purpose of the Hybridisms.Client.WebAssembly.ClientStub project as of May 2025.*
+*This README describes the hybrid configuration technique demonstrated by the Hybridisms.Client.WebAssembly.ClientStub project as of May 2025.*

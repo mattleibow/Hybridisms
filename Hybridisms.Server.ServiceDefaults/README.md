@@ -1,20 +1,48 @@
 # Hybridisms.Server.ServiceDefaults
 
-This project provides shared service configuration and extension methods for server-side projects in the Hybridisms suite, especially for .NET Aspire-based solutions.
+This project demonstrates how to configure backend services to support hybrid applications, with service discovery, health monitoring, and telemetry solutions that work consistently across both web and native client scenarios.
 
-## Purpose
-- Centralizes common service registrations for server projects.
-- Adds support for service discovery, resilience, health checks, and OpenTelemetry.
+## Hybrid Techniques Demonstrated
+- **Hybrid-Ready Service Registration**: Configures server endpoints to be discoverable by both web and native clients
+- **Health Monitoring**: Enables clients across platforms to check service health
+- **Cross-Platform Telemetry**: Configures observability that works for the entire hybrid app ecosystem
 
-## Key Features
-- **Extension Methods**: For adding service defaults to ASP.NET Core host builders.
-- **OpenTelemetry Integration**: Configures metrics and tracing for observability.
-- **Service Discovery**: Enables service-to-service communication in distributed environments.
-- **Health Checks**: Adds health check endpoints for monitoring.
+## Key Hybrid Features
+- **Hybrid-Ready Service Registration**: Extensions to make services work with both web and native clients:
+  ```csharp
+  public static WebApplicationBuilder AddServiceDefaults(this WebApplicationBuilder builder)
+  {
+      // Configure services for all client types (web and native)
+      builder.Services.AddServiceDiscovery();
+      
+      // Health checks accessible from any platform
+      builder.Services.AddHealthChecks()
+          .AddCheck("self", () => HealthCheckResult.Healthy());
+      
+      // Cross-platform telemetry
+      builder.Services.AddOpenTelemetry()
+          .WithTracing(tracing => {
+              // Collect telemetry from both web and native clients
+          });
+      
+      return builder;
+  }
+  ```
 
-## Usage
-- Reference this project from server-side projects to apply consistent service configuration.
-- Call the provided extension methods in your server's startup code.
+- **Platform-Agnostic Endpoints**: Configures service endpoints to be accessible from any client type
+- **Comprehensive Health Monitoring**: Enables clients to verify service health before operations
+
+## How the Hybrid Server Configuration Works
+- **Universal Endpoint Configuration**: Ensures all server endpoints are accessible from any client platform
+- **Consistent Service Discovery**: Enables service location for both web and native clients
+- **Health Check Endpoints**: Available to all clients to determine service status
+- **Unified Telemetry**: Traces interactions across web and native client boundaries
+
+## Implementing This Pattern in Your Hybrid Apps
+1. Configure server endpoints with platform-agnostic discovery
+2. Implement comprehensive health checks visible to all client types
+3. Set up telemetry that can track operations across platform boundaries
+4. Use consistent service configuration that works for both web and native clients
 
 ---
-*This README was generated automatically to describe the structure and purpose of the Hybridisms.Server.ServiceDefaults project as of May 2025.*
+*This README describes the hybrid server configuration techniques demonstrated by the Hybridisms.Server.ServiceDefaults project as of May 2025.*
