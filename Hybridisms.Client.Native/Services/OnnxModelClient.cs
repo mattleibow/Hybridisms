@@ -1,10 +1,11 @@
 using System.IO.Compression;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Hybridisms.Client.Native.Services;
 
-namespace Hybridisms.Client.NativeApp.Services;
+namespace Hybridisms.Client.Native.Services;
 
-public abstract class OnnxModelClient<TOptions>(IOptions<TOptions> options, ILogger<OnnxModelClient<TOptions>>? logger)
+public abstract class OnnxModelClient<TOptions>(IOptions<TOptions> options, ILogger<OnnxModelClient<TOptions>>? logger, IAppFileProvider fileProvider) : object
     where TOptions : OnnxModelClient<TOptions>.OnnxModelClientOptions
 {
     private readonly SemaphoreSlim isModelReadyLock = new(1, 1);
@@ -35,7 +36,7 @@ public abstract class OnnxModelClient<TOptions>(IOptions<TOptions> options, ILog
     {
         logger?.LogInformation("Unpacking model from {BundledPath} to {ExtractedPath}", options.Value.BundledPath, options.Value.ExtractedPath);
 
-        using var source = await FileSystem.OpenAppPackageFileAsync(options.Value.BundledPath);
+        using var source = await fileProvider.OpenAppPackageFileAsync(options.Value.BundledPath);
         using var archive = new ZipArchive(source, ZipArchiveMode.Read);
         Directory.CreateDirectory(options.Value.ExtractedPath);
         archive.ExtractToDirectory(options.Value.ExtractedPath, true);

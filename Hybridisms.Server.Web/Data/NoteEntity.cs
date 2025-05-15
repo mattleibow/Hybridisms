@@ -1,4 +1,7 @@
-namespace Hybridisms.Server.WebApp.Data;
+using System;
+using System.Collections.Generic;
+
+namespace Hybridisms.Server.Web.Data;
 
 public class NoteEntity : BaseEntity
 {

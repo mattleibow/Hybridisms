@@ -2,7 +2,7 @@ using Hybridisms.Client.Shared.Services;
 using Hybridisms.Server.WebApp.Services;
 using Microsoft.Extensions.AI;
 
-namespace Hybridisms.Client.NativeApp.Services;
+namespace Hybridisms.Client.Native.Services;
 
 public class EmbeddedIntelligenceService(EmbeddedNotesService notesService, OnnxChatClient chatClient, OnnxEmbeddingClient embeddingClient) : IIntelligenceService
 {

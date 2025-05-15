@@ -1,11 +1,12 @@
-using SQLite;
+using System;
 
-namespace Hybridisms.Client.NativeApp.Data;
+namespace Hybridisms.Server.Web.Data;
 
-[Table("Notebooks")]
 public class NotebookEntity : BaseEntity
 {
     public string Title { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
+
+    public ICollection<NoteEntity> Notes { get; set; } = [];
 }

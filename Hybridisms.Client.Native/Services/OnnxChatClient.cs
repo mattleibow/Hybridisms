@@ -5,7 +5,7 @@ using Microsoft.ML.OnnxRuntimeGenAI;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Hybridisms.Client.NativeApp.Services;
+namespace Hybridisms.Client.Native.Services;
 
 public class OnnxChatClient(IOptions<OnnxChatClient.ChatClientOptions> options, ILogger<OnnxChatClient>? logger)
     : OnnxModelClient<OnnxChatClient.ChatClientOptions>(options, logger), IChatClient

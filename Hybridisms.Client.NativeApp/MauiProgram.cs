@@ -2,9 +2,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
-using Hybridisms.Client.NativeApp.Services;
-using Hybridisms.Client.NativeApp.Data;
+using Hybridisms.Client.Native.Data;
+using Hybridisms.Client.Native.Services;
 using Microsoft.Extensions.AI;
+using Hybridisms.Client.NativeApp.Services;
 
 namespace Hybridisms.Client.NativeApp;
 
@@ -70,6 +71,9 @@ public static class MauiProgram
         // Register the hybrid services that we will use
         builder.Services.AddScoped<INotesService, HybridNotesService>();
         builder.Services.AddScoped<IIntelligenceService, HybridIntelligenceService>();
+
+        // Register MauiAppFileProvider as a singleton for IAppFileProvider
+        builder.Services.AddSingleton<IAppFileProvider, MauiAppFileProvider>();
 
 #if DEBUG
         // Enable developer tools and debug logging in debug builds

@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace Hybridisms.Client.NativeApp.Data;
+namespace Hybridisms.Client.Native.Data;
 
 public abstract class BaseEntity
 {

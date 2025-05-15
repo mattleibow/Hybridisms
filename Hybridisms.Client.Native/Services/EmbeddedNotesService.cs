@@ -1,7 +1,7 @@
-using Hybridisms.Client.NativeApp.Data;
+using Hybridisms.Client.Native.Data;
 using Hybridisms.Client.Shared.Services;
 
-namespace Hybridisms.Client.NativeApp.Services;
+namespace Hybridisms.Client.Native.Services;
 
 public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesService
 {

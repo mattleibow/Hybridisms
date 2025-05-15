@@ -1,7 +1,6 @@
 using Hybridisms.Client.Shared.Services;
-using Hybridisms.Server.WebApp.Components;
-using Hybridisms.Server.WebApp.Data;
-using Hybridisms.Server.WebApp.Services;
+using Hybridisms.Server.Web.Data;
+using Hybridisms.Server.Web.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 

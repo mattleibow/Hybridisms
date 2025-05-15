@@ -1,7 +1,7 @@
 using Hybridisms.Client.Shared.Services;
 using Microsoft.Extensions.AI;
 
-namespace Hybridisms.Server.WebApp.Services;
+namespace Hybridisms.Server.Web.Services;
 
 public class AdvancedIntelligenceService(INotesService db, IChatClient chatClient) : IIntelligenceService
 {

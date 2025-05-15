@@ -1,7 +1,7 @@
 using Hybridisms.Client.Shared.Services;
 using Microsoft.Extensions.Logging;
 
-namespace Hybridisms.Client.NativeApp.Services;
+namespace Hybridisms.Client.Native.Services;
 
 public class HybridIntelligenceService(RemoteIntelligenceService remote, EmbeddedIntelligenceService local, ILogger<HybridIntelligenceService>? logger) : IIntelligenceService
 {

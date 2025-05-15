@@ -1,8 +1,8 @@
 using Hybridisms.Client.Shared.Services;
-using Hybridisms.Server.WebApp.Data;
+using Hybridisms.Server.Web.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Hybridisms.Server.WebApp.Services;
+namespace Hybridisms.Server.Web.Services;
 
 public class DbNotesService(HybridismsDbContext db) : INotesService
 {

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Hybridisms.Server.WebApp.Data;
+namespace Hybridisms.Server.Web.Data;
 
 public class HybridismsDbContext(DbContextOptions<HybridismsDbContext> options) : DbContext(options)
 {

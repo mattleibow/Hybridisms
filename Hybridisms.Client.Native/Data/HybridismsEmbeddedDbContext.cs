@@ -2,7 +2,7 @@ using System.Data.Common;
 using Microsoft.Extensions.Options;
 using SQLite;
 
-namespace Hybridisms.Client.NativeApp.Data;
+namespace Hybridisms.Client.Native.Data;
 
 public class HybridismsEmbeddedDbContext(IOptions<HybridismsEmbeddedDbContext.DbContextOptions> options)
 {

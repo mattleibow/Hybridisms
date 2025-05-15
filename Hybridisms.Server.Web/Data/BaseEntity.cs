@@ -1,4 +1,6 @@
-namespace Hybridisms.Server.WebApp.Data;
+using System;
+
+namespace Hybridisms.Server.Web.Data;
 
 public abstract class BaseEntity
 {

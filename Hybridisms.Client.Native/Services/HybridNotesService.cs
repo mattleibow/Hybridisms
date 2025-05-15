@@ -1,11 +1,11 @@
-using Hybridisms.Client.NativeApp.Data;
+using Hybridisms.Client.Native.Data;
 using Hybridisms.Client.Shared.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Hybridisms.Client.NativeApp.Services;
+namespace Hybridisms.Client.Native.Services;
 
-public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService local, IOptions<HybridismsEmbeddedDbContext.DbContextOptions> options, ILogger<HybridNotesService>? logger)
+public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService local, IOptions<HybridismsEmbeddedDbContext.DbContextOptions> options, ILogger<HybridNotesService>? logger, IAppFileProvider fileProvider)
     : INotesService
 {
     public Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default)
@@ -112,7 +112,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         if (options.Value.DatabasePath is not string path || File.Exists(path))
             return;
 
-        using var raw = await FileSystem.OpenAppPackageFileAsync("hybridisms.db");
+        using var raw = await fileProvider.OpenAppPackageFileAsync("hybridisms.db");
         using var fileStream = File.Create(path);
         await raw.CopyToAsync(fileStream, cancellationToken);
     }

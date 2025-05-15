@@ -4,7 +4,7 @@ using Microsoft.ML.Tokenizers;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 
-namespace Hybridisms.Client.NativeApp.Services;
+namespace Hybridisms.Client.Native.Services;
 
 public class OnnxEmbeddingClient(IOptions<OnnxEmbeddingClient.EmbeddingClientOptions> options, ILogger<OnnxEmbeddingClient>? logger)
     : OnnxModelClient<OnnxEmbeddingClient.EmbeddingClientOptions>(options, logger)
