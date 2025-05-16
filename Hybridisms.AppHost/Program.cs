@@ -31,11 +31,11 @@ var db = builder.AddSqlite("db", dbDir, "hybridisms.db")
 
 var sqliteWeb = db.WithSqliteWeb(b => b.InGroup(dataGroup));
 
-// Register the worker as a data item
 var dbSeeder = builder.AddProject<Projects.Hybridisms_Server_Worker>("db-seeder")
     .InGroup(dataGroup)
     .WithReference(db)
     .WaitFor(db);
+
 
 // Apps
 
@@ -47,15 +47,15 @@ var web = builder.AddProject<Projects.Hybridisms_Server_WebApp>("webapp")
     .WithReference(db)
     .WaitForCompletion(dbSeeder);
 
-if (builder.ExecutionContext.IsRunMode)
-{
-    builder.AddMauiProject("mobile", "Hybridisms.Client.NativeApp")
-        .InGroup(appsGroup)
-        .WithReference(web);
+builder.AddMauiProject("mobile", "Hybridisms.Client.NativeApp")
+    .InGroup(appsGroup)
+    .WithReference(web)
+    .ExcludeFromManifest();
 
-    builder.AddWasmProject("wasm", "Hybridisms.Client.WebAssembly")
-        .InGroup(appsGroup)
-        .WithReference(web);
-}
+builder.AddWasmProject("wasm", "Hybridisms.Client.WebAssembly")
+    .InGroup(appsGroup)
+    .WithReference(web)
+    .ExcludeFromManifest();
+
 
 builder.Build().Run();
