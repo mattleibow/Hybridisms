@@ -15,11 +15,6 @@ This project demonstrates the web side of a hybrid application strategy using Bl
   builder.Services.AddScoped<INotesService, RemoteNotesService>();
   builder.Services.AddScoped<IIntelligenceService, RemoteIntelligenceService>();
   ```
-- **Generated Settings**: Uses Aspire-generated settings from the ClientStub project:
-  ```csharp
-  // AspireAppSettings.g.cs is generated at build time
-  builder.Configuration.AddAspireGeneratedSettings();
-  ```
 - **Platform Feature Detection**: Works with HybridRenderMode to optimize rendering
 
 ## Structure
@@ -37,7 +32,6 @@ This project demonstrates the web side of a hybrid application strategy using Bl
 1. Create shared component and service interface libraries
 2. Build web client implementations using HTTP APIs
 3. Implement the same interfaces in native clients
-4. Use Aspire ClientStub projects to share configuration
 
 ---
 *This README describes the hybrid web techniques demonstrated by the Hybridisms.Client.WebAssembly project as of May 2025.*

@@ -63,11 +63,6 @@ Demonstrates .NET Aspire integration:
 - **Mobile Project Integration**: Uses AspireMobile to connect mobile clients
 - **Configuration Generation**: Creates settings files for mobile/WASM clients
 
-### 6. **ClientStub Projects**
-- **Hybridisms.Client.NativeApp.ClientStub** & **Hybridisms.Client.WebAssembly.ClientStub**
-  - Bridge between Aspire distributed app model and client-side settings
-  - Enables mobile and WASM apps to participate in the distributed application
-
 ## Key Hybrid Implementation Techniques
 
 ### Shared UI with Blazor
@@ -92,14 +87,12 @@ Demonstrates .NET Aspire integration:
 
 ### Hybrid App Configuration
 - **AspireMobile Integration**: Extends .NET Aspire to work with mobile/WASM clients
-- **Client Stubs**: Generate settings from Aspire environment variables
 - **Common Service Defaults**: Shared configuration for resilience and service discovery
 
 ## Learning From This Demo
 
 - Examine `HybridRenderMode.cs` to see how UI adapts to different platforms
 - Study `HybridNotesService.cs` and `HybridIntelligenceService.cs` to understand online/offline strategies
-- Look at `ClientStub` projects to learn how Aspire configuration works with client apps
 - View common Blazor components in the `Shared` project to see cross-platform UI patterns
 
 ---

@@ -16,7 +16,7 @@ builder.Services.AddRazorComponents()
 
 // Add EF Core DbContext with SQLite
 builder.Services.AddDbContext<HybridismsDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("db")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("db")?.Replace("Extensions=[]", "")));
 
 // Add controller services
 builder.Services.AddControllers();
