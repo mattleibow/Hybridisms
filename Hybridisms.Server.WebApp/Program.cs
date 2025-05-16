@@ -1,9 +1,8 @@
-using Hybridisms.Shared.Services;
 using Hybridisms.Server.Data;
 using Hybridisms.Server.Services;
 using Hybridisms.Server.WebApp.Components;
+using Hybridisms.Shared.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,15 +31,6 @@ builder.AddAzureOpenAIClient("ai")
     .AddChatClient("ai-model");
 
 var app = builder.Build();
-
-// Apply EF Core migrations at startup
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<HybridismsDbContext>();
-
-    await db.Database.EnsureCreatedAsync();
-    await db.SeedAsync();
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

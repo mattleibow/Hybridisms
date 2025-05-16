@@ -31,6 +31,12 @@ var db = builder.AddSqlite("db", dbDir, "hybridisms.db")
 
 var sqliteWeb = db.WithSqliteWeb(b => b.InGroup(dataGroup));
 
+// Register the worker as a data item
+var dbSeeder = builder.AddProject<Projects.Hybridisms_Server_Worker>("db-seeder")
+    .InGroup(dataGroup)
+    .WithReference(db)
+    .WaitFor(db);
+
 // Apps
 
 var appsGroup = builder.AddGroup("apps");
@@ -38,7 +44,8 @@ var appsGroup = builder.AddGroup("apps");
 var web = builder.AddProject<Projects.Hybridisms_Server_WebApp>("webapp")
     .InGroup(appsGroup)
     .WithReference(ai)
-    .WithReference(db);
+    .WithReference(db)
+    .WaitForCompletion(dbSeeder);
 
 if (builder.ExecutionContext.IsRunMode)
 {
