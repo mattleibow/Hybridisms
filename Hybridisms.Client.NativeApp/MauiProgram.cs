@@ -1,10 +1,8 @@
 ﻿using Hybridisms.Shared.Services;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Hybridisms.Client.Native.Data;
 using Hybridisms.Client.Native.Services;
-using Microsoft.Extensions.AI;
 using Hybridisms.Client.NativeApp.Services;
 
 namespace Hybridisms.Client.NativeApp;
