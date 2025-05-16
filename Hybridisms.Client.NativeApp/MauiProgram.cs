@@ -38,7 +38,7 @@ public static class MauiProgram
         builder.Services.AddOptions<HybridismsEmbeddedDbContext.DbContextOptions>()
             .Configure(options =>
             {
-                options.DatabasePath = Path.Combine(FileSystem.AppDataDirectory, "hybridisms.db");
+                options.DatabasePath = Path.Combine(FileSystem.Current.AppDataDirectory, "data", "hybridisms.db");
             });
         builder.Services.AddSingleton<HybridismsEmbeddedDbContext>();
 

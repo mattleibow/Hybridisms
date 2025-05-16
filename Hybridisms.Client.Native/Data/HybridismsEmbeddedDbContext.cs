@@ -9,7 +9,7 @@ public class HybridismsEmbeddedDbContext(IOptions<HybridismsEmbeddedDbContext.Db
 
     public string DatabasePath => options.Value.DatabasePath;
 
-    public SQLiteAsyncConnection Connection => connection ??= new(DatabasePath);
+    public SQLiteAsyncConnection Connection => connection ??= CreateConnection();
 
     public DbSet<NoteEntity> Notes => new(Connection);
 
@@ -25,6 +25,16 @@ public class HybridismsEmbeddedDbContext(IOptions<HybridismsEmbeddedDbContext.Db
         await Connection.CreateTableAsync<TopicEntity>();
         await Connection.CreateTableAsync<NotebookEntity>();
         await Connection.CreateTableAsync<NoteTopicEntity>();
+    }
+
+    private SQLiteAsyncConnection CreateConnection()
+    {
+        if (Path.GetDirectoryName(DatabasePath) is string dir && !string.IsNullOrEmpty(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+
+        return new(DatabasePath);
     }
 
     public class DbSet<T>(SQLiteAsyncConnection connection) : AsyncTableQuery<T>(connection.GetConnection().Table<T>())
