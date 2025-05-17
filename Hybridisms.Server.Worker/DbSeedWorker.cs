@@ -4,9 +4,9 @@ using System.Diagnostics;
 
 namespace Hybridisms.Server.Worker;
 
-public class Worker(IServiceScopeFactory serviceProvider, IHostApplicationLifetime lifetime, ILogger<Worker>? logger) : BackgroundService
+public class DbSeedWorker(IServiceScopeFactory serviceProvider, IHostApplicationLifetime lifetime, ILogger<DbSeedWorker>? logger = null) : BackgroundService
 {
-    public const string ActivitySourceName = "Worker";
+    public const string ActivitySourceName = "DbSeedWorker";
 
     private static readonly ActivitySource ActivitySource = new(ActivitySourceName);
 
@@ -41,7 +41,7 @@ public class Worker(IServiceScopeFactory serviceProvider, IHostApplicationLifeti
         {
             activity?.AddException(ex);
 
-            throw;
+            logger?.LogCritical(ex, "An error occurred while executing the database seeding process.");
         }
 
         lifetime.StopApplication();

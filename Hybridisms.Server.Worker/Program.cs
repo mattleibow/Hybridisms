@@ -9,11 +9,11 @@ builder.AddServiceDefaults();
 builder.Services.AddDbContext<HybridismsDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("db")?.Replace("Extensions=[]", "")));
 
-builder.Services.AddHostedService<Worker>();
+builder.Services.AddHostedService<DbSeedWorker>();
 
 builder.Services
     .AddOpenTelemetry()
-    .WithTracing(tracing => tracing.AddSource(Worker.ActivitySourceName));
+    .WithTracing(tracing => tracing.AddSource(DbSeedWorker.ActivitySourceName));
 
 var host = builder.Build();
 
