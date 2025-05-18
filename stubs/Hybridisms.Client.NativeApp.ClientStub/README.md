@@ -1,34 +1,25 @@
 # Hybridisms.Client.NativeApp.ClientStub
 
-This project demonstrates a key hybrid application technique: bridging the gap between distributed application configuration and native mobile clients. It solves the problem of how to get Aspire environment variables into a native application that doesn't receive them at runtime.
+## Overview
+This is a stub project used for Aspire orchestration and service discovery in hybrid scenarios. It enables Aspire to manage and launch the native client as part of the distributed hybrid app.
 
-## Hybrid Technique Demonstrated
-- **Configuration Bridge Pattern**: Translating server-side distributed application settings to client-side configuration
-- **Build-Time Settings Generation**: Creating compile-time configurations for native apps from runtime application settings
+## What the Project Does
+- Acts as a placeholder for the native client in Aspire-based orchestration.
+- Enables service discovery and configuration for the native app.
+- Does not contain application logic; used for deployment and configuration only.
 
-## How the Hybrid Bridge Works
-- **Aspire Integration**: The stub project is added to the Aspire application model
-- **Environment Variables**: Aspire provides environment variables to the stub project at development time
-- **Settings Generation**: The stub converts environment variables to a C# settings file:
-  ```csharp
-  // AspireAppSettings.g.cs is generated
-  public static class AspireAppSettings 
-  {
-      public static class ServiceA 
-      {
-          public const string Endpoint = "https://servicea.example.com";
-      }
-      // ...
-  }
-  ```
-- **Build Integration**: The generated settings file is included in the native app at build time
+## Implementation Architecture
+- **Stub Project**: Contains minimal code and references for Aspire orchestration.
+- **Service Discovery**: Integrates with Aspire and service defaults for hybrid scenarios.
 
-## Implementing This Pattern in Your Hybrid Apps
-1. Create a ClientStub project for your native app
-2. Configure the Aspire AppHost to reference your ClientStub project
-3. Set up the ClientStub to generate settings based on environment variables
-4. Reference the generated settings in your native app
-5. Use the settings to connect to services in the distributed application
+## Hybrid App Enablement
+- **Orchestration**: Allows the native client to be managed as part of the distributed hybrid solution.
+- **Service Discovery**: Ensures the native client can discover and connect to backend services.
 
----
-*This README describes the hybrid configuration bridge technique demonstrated by the Hybridisms.Client.NativeApp.ClientStub project as of May 2025.*
+## Example: Stub Project Reference
+```xml
+<ProjectReference Include="..\..\Hybridisms.Client.NativeApp\Hybridisms.Client.NativeApp.csproj" />
+```
+
+## Summary
+Hybridisms.Client.NativeApp.ClientStub is essential for orchestrating and configuring the native client in hybrid Aspire deployments.

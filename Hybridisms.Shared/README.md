@@ -1,96 +1,58 @@
 # Hybridisms.Shared
 
-This project is the cornerstone of the Hybridisms demo's hybrid strategy. It provides shared client-side logic, models, and UI components that work across Blazor WebAssembly (browser) and .NET MAUI (native) platforms, demonstrating how to maximize code sharing in hybrid applications.
+## Overview
+Hybridisms.Shared is a class library that defines the shared contracts, models, and service interfaces for the Hybridisms demonstration app. It enables code reuse and consistent data structures across all hybrid client and server projects.
 
-## Hybrid Techniques Demonstrated
+## What the Project Does
+- Defines core data models for notes, notebooks, and topics.
+- Provides service interfaces for notes and AI-powered intelligence features.
+- Implements remote service clients for HTTP-based communication.
+- Supplies utility extensions for hybrid rendering and AI chat integration.
 
-- **Write Once, Run Anywhere UI**: Blazor components that work in both web and native environments
-- **Adaptive Rendering**: `HybridRenderMode` utility that selects the appropriate render mode based on runtime capabilities
-- **Common Service Abstractions**: Interface-based design that allows for platform-specific implementations while maintaining a consistent API
-- **Shared Domain Model**: Single set of models used across all platforms
+## Implementation Architecture
+- **Models**: Includes `Note`, `Notebook`, `Topic`, and `TopicRecommendation` for consistent data representation.
+- **Service Interfaces**: `INotesService` and `IIntelligenceService` abstract data and AI operations for all clients.
+- **Remote Service Implementations**: `RemoteNotesService` and `RemoteIntelligenceService` enable HTTP-based access to backend APIs.
+- **Hybrid Render Modes**: `HybridRenderMode` provides helpers for switching between server, auto, and WebAssembly rendering in Blazor.
+- **Chat Client Extensions**: Utility methods for interacting with AI chat clients in a hybrid manner.
 
-## Key Hybrid Features
+## Hybrid App Enablement
+- **Code Sharing**: All client and server projects reference this library, ensuring a single source of truth for models and interfaces.
+- **Remote/Local Service Swapping**: Clients can switch between local and remote implementations of services for hybrid flexibility.
+- **Hybrid Rendering**: Blazor projects use shared render mode helpers to adapt to different hosting environments.
 
-- **HybridRenderMode**: Core utility that adapts rendering based on available runtime features:
-  ```csharp
-  // Use in Razor components like this:
-  @renderMode="@HybridRenderMode.InteractiveAuto"
-  ```
-  
-- **Service Interfaces**: Platform-agnostic interfaces that enable swappable implementations:
-  - `INotesService`: For data operations across any platform
-  - `IIntelligenceService`: For AI features that work both in the cloud and on-device
-
-- **Remote Implementations**: HTTP-based service implementations for web scenarios
-  
-- **Cross-Platform UI Components**: Blazor components that adapt to where they're running
-
-## Structure
-
-### Models (`Services/Models`)
-- **ModelBase**: Abstract base class with `Id`, `Created`, and `Modified` properties.
-- **Note**: Represents a note, including title, content (Markdown), starred status, topics, and notebook association. Automatically tracks changes and generates HTML from Markdown.
-- **Notebook**: Represents a notebook, with title, description, and a collection of notes.
-- **Topic**: Represents a topic/tag, with name and color.
-- **TopicRecommendation**: Used for AI-powered topic suggestions, pairing a `Topic` with a reason.
-
-### Service Interfaces (`Services`)
-- **INotesService**: Abstraction for CRUD operations on notebooks, notes, and topics. Used by both local and remote implementations.
-- **IIntelligenceService**: Abstraction for AI-powered features, such as recommending topics for a note and generating note content from a prompt.
-
-### Remote Service Implementations (`Services`)
-- **RemoteNotesService**: Implements `INotesService` using HTTP APIs. Handles all CRUD operations by calling backend endpoints.
-- **RemoteIntelligenceService**: Implements `IIntelligenceService` using HTTP APIs for AI features (topic recommendations, content generation).
-
-### Extensions (`Services`)
-- **NotesServiceExtensions**: Helper methods for working with `INotesService` (e.g., saving a single notebook).
-- **ChatClientExtensions**: Helper methods for interacting with chat-based AI clients.
-
-### Components (`Components`)
-- **TagInput**: Blazor component for editing a list of tags/topics, with support for suggestions and recommendations.
-- **Pages**: UI pages for editing and viewing notes and notebooks:
-  - `DeviceInfo.razor`: Shows device and render mode info.
-  - `Edit.razor`: Example interactive page.
-  - `NotebookEdit.razor`: Edit notebook details.
-  - `NotebookNew.razor`: Create a new notebook.
-  - `NotebookNotes.razor`: List notes in a notebook.
-  - `NoteEdit.razor`: Edit a note, including AI-powered topic suggestions and content generation.
-
-### Utilities
-- **HybridRenderMode**: Utility for selecting the appropriate Blazor render mode (server, WASM, or auto) based on runtime support.
-
-## How the Hybrid Pattern Works
-
-### Adaptive Rendering
-The `HybridRenderMode` class demonstrates how to select the appropriate rendering strategy based on the runtime environment:
-
+## Example: Shared Service Interface
 ```csharp
-public static class HybridRenderMode
+public interface INotesService
 {
-    // Different render modes for different environments
-    public static IComponentRenderMode? InteractiveServer { get; } = IfSupported(RenderMode.InteractiveServer);
-    public static IComponentRenderMode? InteractiveAuto { get; } = IfSupported(RenderMode.InteractiveAuto);
-    public static IComponentRenderMode? InteractiveWebAssembly { get; } = IfSupported(RenderMode.InteractiveWebAssembly);
-
-    // Checks if the current environment supports the requested render mode
-    private static IComponentRenderMode? IfSupported(IComponentRenderMode? mode) =>
-        !AppContext.TryGetSwitch("Hybridisms.SupportsRenderMode", out var isEnabled) || isEnabled ? mode : null;
+    Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default);
+    Task<Notebook?> GetNotebookAsync(Guid notebookId, CancellationToken cancellationToken = default);
+    // ...other methods...
 }
 ```
 
-### Platform-Agnostic Service Design
-Services are designed with interfaces that can be implemented differently for each platform:
+## Example: Remote Service Implementation
+```csharp
+public class RemoteNotesService(HttpClient httpClient) : INotesService
+{
+    public async Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default)
+    {
+        var notebooks = await httpClient.GetFromJsonAsync<ICollection<Notebook>>("api/notebook");
+        return notebooks ?? [];
+    }
+    // ...other methods...
+}
+```
 
-- **Web Client**: Uses `RemoteNotesService` and `RemoteIntelligenceService` to call APIs
-- **Native Client**: Can use `EmbeddedNotesService` for offline or `HybridNotesService` for mixed operation
+## Example: Hybrid Render Mode Helper
+```csharp
+public static class HybridRenderMode
+{
+    public static IComponentRenderMode? InteractiveServer { get; } = IfSupported(RenderMode.InteractiveServer);
+    public static IComponentRenderMode? InteractiveWebAssembly { get; } = IfSupported(RenderMode.InteractiveWebAssembly);
+    // ...
+}
+```
 
-### Implementing Your Own Hybrid Apps
-
-1. **Reference this approach**: Study how the shared components and services are designed
-2. **Use the interface pattern**: Define capabilities as interfaces with multiple implementations
-3. **Leverage HybridRenderMode**: Adapt your UI based on the runtime environment
-4. **Create hybrid services**: Implement services that can work both online and offline
-
----
-
-*This README was generated automatically to describe the structure and purpose of the Hybridisms.Shared project as of May 2025.*
+## Summary
+Hybridisms.Shared is the foundation for hybrid app development in the Hybridisms solution, providing shared contracts, models, and utilities for seamless interoperability across all platforms.

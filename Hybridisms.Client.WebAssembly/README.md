@@ -1,37 +1,38 @@
 # Hybridisms.Client.WebAssembly
 
-This project demonstrates the web side of a hybrid application strategy using Blazor WebAssembly, showing how to share UI components, business logic, and service interfaces with native clients while still delivering a full browser-based experience.
+## Overview
+Hybridisms.Client.WebAssembly is a Blazor WebAssembly (WASM) project that serves as a browser-based client for the Hybridisms demonstration app. It demonstrates how hybrid web clients can interact with shared backend services and leverage remote intelligence features.
 
-## Hybrid Techniques Demonstrated
-- **Component Sharing**: Uses the same Blazor components as the native MAUI app
-- **Common Interfaces**: Implements the same service contracts as the native client
-- **Aspire Integration**: Gets configuration from a distributed application model
+## What the Project Does
+- Provides a rich, interactive UI running entirely in the browser using Blazor WebAssembly.
+- Connects to backend APIs for notes, topics, notebooks, and AI features via HTTP.
+- Uses shared service interfaces and models to enable code reuse across hybrid clients.
+- Configures service discovery and environment settings for hybrid deployments.
 
-## Key Hybrid Features
-- **Shared Components**: Uses the exact same UI components from Hybridisms.Shared that the native app uses
-- **Remote Service Pattern**: Implements the common service interfaces using HTTP APIs:
-  ```csharp
-  // Same interface as native, different implementation
-  builder.Services.AddScoped<INotesService, RemoteNotesService>();
-  builder.Services.AddScoped<IIntelligenceService, RemoteIntelligenceService>();
-  ```
-- **Platform Feature Detection**: Works with HybridRenderMode to optimize rendering
+## Implementation Architecture
+- **Blazor WebAssembly**: Runs C# code in the browser, enabling a modern SPA experience.
+- **Remote Services**: Registers `INotesService` and `IIntelligenceService` as HTTP clients, pointing to the backend server (`webapp`).
+- **Service Defaults**: Uses `AddServiceDefaults()` for consistent configuration and service discovery in hybrid environments.
+- **Shared Contracts**: Reuses models and interfaces from `Hybridisms.Shared` for seamless interoperability with other clients and the server.
 
-## Structure
-- **wwwroot/**: Static web assets.
-- **_Imports.razor**: Common Razor imports for the client.
-- **Program.cs**: Client startup and service registration.
+## Hybrid App Enablement
+- **Remote Service Integration**: The client is designed to work with remote APIs, making it easy to swap between local and cloud-hosted backends.
+- **Shared Codebase**: By referencing shared contracts, the project ensures consistent data models and business logic across all hybrid clients.
+- **Environment Configuration**: Uses generated Aspire app settings and service defaults for flexible deployment in hybrid scenarios.
 
-## How the Hybrid Sharing Works
-- **Common Abstraction Layer**: Interfaces like `INotesService` allow for different implementations across platforms
-- **Blazor UI Reuse**: Identical UI components work in both WebAssembly and MAUI Blazor Hybrid
-- **Consistent User Experience**: Users get the same functionality whether in browser or native app
-- **Unified Service Discovery**: Configuration is generated from the same Aspire host that configures the backend
+## Example: Registering Remote Services
+The client configures its data and AI services to use HTTP APIs exposed by the server:
 
-## Implementing This Pattern in Your Hybrid Apps
-1. Create shared component and service interface libraries
-2. Build web client implementations using HTTP APIs
-3. Implement the same interfaces in native clients
+```csharp
+builder.Services.AddHttpClient<INotesService, RemoteNotesService>(static client => client.BaseAddress = new("https+http://webapp/"));
+builder.Services.AddHttpClient<IIntelligenceService, RemoteIntelligenceService>(static client => client.BaseAddress = new("https+http://webapp/"));
+```
 
----
-*This README describes the hybrid web techniques demonstrated by the Hybridisms.Client.WebAssembly project as of May 2025.*
+## Example: Service Defaults for Hybrid Environments
+
+```csharp
+builder.AddServiceDefaults();
+```
+
+## Summary
+Hybridisms.Client.WebAssembly demonstrates how to build a browser-based hybrid client using Blazor WebAssembly, shared contracts, and remote service integration for a seamless hybrid app experience.

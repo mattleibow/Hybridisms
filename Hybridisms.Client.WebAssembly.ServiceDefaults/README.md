@@ -1,46 +1,27 @@
 # Hybridisms.Client.WebAssembly.ServiceDefaults
 
-This project demonstrates how to standardize service configuration for the web portion of hybrid applications, ensuring consistency between browser-based clients and their native counterparts. It showcases browser-optimized service discovery and resilience patterns.
+## Overview
+Hybridisms.Client.WebAssembly.ServiceDefaults is a configuration library for Blazor WebAssembly hybrid clients in the Hybridisms solution. It provides service discovery, resilience, and telemetry defaults for browser-based hybrid apps.
 
-## Hybrid Techniques Demonstrated
-- **Browser-Based Service Discovery**: Enables WebAssembly clients to locate services in a hybrid application
-- **Web-Optimized Resilience**: Implements retry and timeout policies tailored for browser environments
-- **Configuration Consistency**: Ensures web clients configure services similarly to native clients
+## What the Project Does
+- Configures service discovery for Blazor WebAssembly clients.
+- Adds HTTP resilience and OpenTelemetry instrumentation.
+- Centralizes environment and logging settings for hybrid deployments.
 
-## Key Hybrid Features
-- **Browser-Optimized Service Extensions**: Configuration tailored for web clients:
-  ```csharp
-  public static class Extensions
-  {
-      public static IServiceCollection AddServiceDefaults(this IServiceCollection services)
-      {
-          // Web-specific service discovery configuration
-          services.AddServiceDiscovery();
-          
-          // Browser-optimized HTTP client configuration
-          services.ConfigureHttpClientDefaults(http => {
-              http.AddStandardResilienceHandler(options => {
-                  // Browser-appropriate resilience settings
-              });
-          });
-          
-          return services;
-      }
-  }
-  ```
-- **Consistent Client-Side Discovery**: Uses the same discovery mechanisms as native clients
-- **Parallel Configuration**: Mirrors the configuration in native clients but with web-specific optimizations
+## Implementation Architecture
+- **Service Discovery**: Integrates with Microsoft.Extensions.ServiceDiscovery for dynamic endpoint resolution.
+- **Resilience**: Adds HTTP resilience policies for robust hybrid communication.
+- **Telemetry**: Configures OpenTelemetry for distributed tracing and monitoring.
 
-## How the Hybrid Web Configuration Works
-- **Extensions Methods**: Provide the same interface as native equivalents but with browser-specific implementations
-- **Common Discovery Mechanism**: Ensures web clients can find the same services as native clients
-- **Platform-Appropriate Defaults**: Timeouts and retry policies tailored for browser environments
+## Hybrid App Enablement
+- **Dynamic Endpoints**: Enables WASM hybrid clients to discover and connect to backend services in any environment.
+- **Unified Telemetry**: Ensures consistent monitoring and diagnostics across hybrid app components.
+- **Centralized Configuration**: Simplifies hybrid deployment and management.
 
-## Implementing This Pattern in Your Hybrid Apps
-1. Create parallel service defaults for web and native clients
-2. Ensure consistent naming and usage patterns across platforms
-3. Optimize each implementation for its target platform
-4. Use in tandem with native service defaults to maintain consistency
+## Example: Service Discovery Configuration
+```xml
+<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
+```
 
----
-*This README describes the hybrid web configuration techniques demonstrated by the Hybridisms.Client.WebAssembly.ServiceDefaults project as of May 2025.*
+## Summary
+Hybridisms.Client.WebAssembly.ServiceDefaults provides essential configuration for robust, discoverable, and observable hybrid WASM clients.

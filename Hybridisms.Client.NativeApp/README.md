@@ -1,60 +1,43 @@
 # Hybridisms.Client.NativeApp
 
-This project demonstrates Blazor Hybrid in a .NET MAUI app with online/offline capabilities. It showcases how to build a truly hybrid native application that works across platforms, shares code with web clients, and functions regardless of connectivity state.
+## Overview
+Hybridisms.Client.NativeApp is a .NET MAUI Blazor Hybrid project that serves as the native mobile and desktop client for the Hybridisms demonstration app. It combines native device features with Blazor-based UI and supports both local and remote AI/data services for hybrid scenarios.
 
-## Hybrid Techniques Demonstrated
-- **Blazor Hybrid**: Using web technologies inside a native shell
-- **Online/Offline Operation**: Seamless switching between local and cloud data
-- **Code Sharing with Web**: Same components and interfaces as the Blazor WebAssembly client
-- **On-Device AI**: ML capabilities that work without cloud connectivity
+## What the Project Does
+- Provides a cross-platform native app (Android, iOS, Windows, MacCatalyst) using .NET MAUI and Blazor Hybrid.
+- Integrates Blazor WebView for a rich, reusable UI across platforms.
+- Supports both local (on-device) and remote (cloud/server) AI and data services.
+- Uses ONNX models for embedded AI capabilities when offline or remote services are unavailable.
+- Synchronizes data with backend APIs and supports offline-first scenarios.
 
-## Key Hybrid Features
-- **Hybrid Service Registration**: Configures services based on connectivity and capabilities:
-  ```csharp
-  // Register the hybrid intelligence service that switches between local and remote
-  builder.Services.AddSingleton<IIntelligenceService, HybridIntelligenceService>();
-  
-  // Register the hybrid notes service that works online and offline
-  builder.Services.AddSingleton<INotesService, HybridNotesService>();
-  ```
-  
-- **BlazorWebView Integration**: Embeds web UI technology in native containers:
-  ```xaml
-  <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
-      <BlazorWebView.RootComponents>
-          <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
-      </BlazorWebView.RootComponents>
-  </BlazorWebView>
-  ```
-  
-- **Connectivity Adaptation**: Detects network state and adjusts behavior accordingly
-- **Local AI Models**: Embedded ML capabilities that don't require cloud access
-- **Shared Components**: Uses the exact same UI components as the web version
+## Implementation Architecture
+- **MAUI Blazor Hybrid**: Combines native app shell with Blazor WebView for hybrid UI.
+- **Hybrid Service Registration**: Registers both remote (HTTP) and embedded (local) implementations for notes and intelligence services, using a hybrid fallback strategy.
+- **ONNX Integration**: Bundles ONNX models for on-device AI (embeddings, chat, recommendations).
+- **SQLite Local Storage**: Uses a local SQLite database for offline data persistence.
+- **Service Defaults**: Configures service discovery and environment settings for hybrid deployments.
 
-## Structure
-- **Components/**: Blazor UI components for the native app.
-- **Data/**: Local database context and models.
-- **Services/**: Local, remote, and hybrid service implementations for notes and intelligence.
-- **Platforms/**: Platform-specific code for MAUI.
-- **Resources/**: App resources and assets.
-- **wwwroot/**: Static assets for Blazor components.
+## Hybrid App Enablement
+- **Hybrid Service Fallback**: The app uses remote services when available, falling back to local/embedded services when offline or remote is unavailable.
+- **Shared UI and Logic**: Reuses Blazor components and shared contracts for consistency with web and WASM clients.
+- **On-Device AI**: Enables hybrid intelligence scenarios by running ONNX models locally when needed.
 
-## How the Hybrid Native Pattern Works
-- **Application Shell**: MAUI provides the native platform capabilities and OS integration
-- **BlazorWebView**: Renders web-based UI inside the native container
-- **Service Layer Switching**: Transparently changes between:
-  - Local SQLite database when offline 
-  - Remote API when online
-  - Synchronization when transitioning between states
-- **Component Reuse**: The same Blazor components work in both contexts
-- **Platform Services**: Native-only features are provided through dependency injection
+## Example: Hybrid Service Registration
+```csharp
+// Register the hybrid services that we will use
+builder.Services.AddScoped<INotesService, HybridNotesService>();
+builder.Services.AddScoped<IIntelligenceService, HybridIntelligenceService>();
+```
 
-## Implementing This Pattern in Your Hybrid Apps
-1. Create a MAUI Blazor app with BlazorWebView
-2. Integrate shared component libraries
-3. Implement hybrid services that can switch between local and remote implementations
-4. Include local database and synchronization logic
-5. Embed ONNX models for offline AI capabilities
+## Example: ONNX Model Integration for Embedded AI
+```csharp
+builder.Services.AddOptions<OnnxEmbeddingClient.EmbeddingClientOptions>()
+    .Configure(options => {
+        options.BundledPath = "Models/miniml_model.zip";
+        options.ExtractedPath = Path.Combine(FileSystem.AppDataDirectory, "Models", "embedding_model");
+    });
+builder.Services.AddSingleton<OnnxEmbeddingClient>();
+```
 
----
-*This README describes the hybrid native techniques demonstrated by the Hybridisms.Client.NativeApp project as of May 2025.*
+## Summary
+Hybridisms.Client.NativeApp demonstrates a true hybrid approach, combining native device features, Blazor UI, and both local and remote AI/data services for a seamless, resilient user experience across platforms.

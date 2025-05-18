@@ -1,19 +1,45 @@
 # Hybridisms.Server
 
-This project contains the core backend services and data models for the Hybridisms suite. It provides the main data access layer and business logic for notes, notebooks, and topics, and is used by the server-side web application.
+## Overview
+Hybridisms.Server is a backend library that provides data access and advanced AI services for the Hybridisms demonstration app. It implements persistent storage, entity mapping, and server-side intelligence features for hybrid scenarios.
 
-## Purpose
-- Implements the main data access and business logic for notes, notebooks, and topics.
-- Provides Entity Framework Core models and context for persistent storage.
-- Supplies services for CRUD operations and AI-powered features.
+## What the Project Does
+- Implements Entity Framework Core data models and DbContext for notes, notebooks, and topics.
+- Provides server-side implementations of notes and intelligence services.
+- Integrates with AI services (e.g., Azure OpenAI) for advanced topic recommendations and note content generation.
+- Maps between database entities and shared models for seamless hybrid data flow.
 
-## Structure
-- **Data/**: Entity Framework Core context and entity models (`HybridismsDbContext`, `NotebookEntity`, `NoteEntity`, `TopicEntity`).
-- **Services/**: Business logic for notes, notebooks, topics, and advanced intelligence features (`DbNotesService`, `AdvancedIntelligenceService`).
+## Implementation Architecture
+- **Entity Framework Core**: Defines `HybridismsDbContext` and entity classes for persistent storage.
+- **DbNotesService**: Implements `INotesService` for CRUD operations on notes, notebooks, and topics.
+- **AdvancedIntelligenceService**: Implements `IIntelligenceService` using AI chat clients for recommendations and content generation.
+- **Entity Mapping**: Maps between database entities and shared models for hybrid compatibility.
 
-## Usage
-- Used as a library by `Hybridisms.Server.WebApp` to provide backend functionality.
-- Not intended to be run directly; reference from the main server project.
+## Hybrid App Enablement
+- **Shared Contracts**: Uses shared models and interfaces for interoperability with all hybrid clients.
+- **AI Integration**: Exposes advanced AI features to hybrid clients via shared service interfaces.
+- **Data Synchronization**: Supports hybrid data flows between local/native and remote/server storage.
 
----
-*This README was generated automatically to describe the structure and purpose of the Hybridisms.Server project as of May 2025.*
+## Example: AI-Powered Topic Recommendation
+```csharp
+public async Task<ICollection<TopicRecommendation>> RecommendTopicsAsync(Note note, int count = 3, CancellationToken cancellationToken = default)
+{
+    // ...
+    var selectedLabels = await chatClient.GetResponseAsync<List<SelectedLabel>>(systemPrompt, prompt, null, cancellationToken);
+    // ...
+}
+```
+
+## Example: Entity Framework Core DbContext
+```csharp
+public class HybridismsDbContext(DbContextOptions<HybridismsDbContext> options) : DbContext(options)
+{
+    public DbSet<NoteEntity> Notes => Set<NoteEntity>();
+    public DbSet<TopicEntity> Topics => Set<TopicEntity>();
+    public DbSet<NotebookEntity> Notebooks => Set<NotebookEntity>();
+    // ...
+}
+```
+
+## Summary
+Hybridisms.Server provides the backend data and AI services for the hybrid solution, enabling persistent storage, advanced intelligence, and seamless data flow for all hybrid app clients.

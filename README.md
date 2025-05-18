@@ -1,100 +1,135 @@
 # Hybridisms
 
-Hybridisms is a demo application that showcases hybrid development techniques using .NET. It demonstrates how to build a cross-platform note-taking application that works seamlessly across web, desktop, and mobile with shared code and UI components. The key hybrid techniques demonstrated include:
-
-1. **Code sharing** between web and native platforms using Blazor
-2. **Hybrid rendering modes** that adapt to different environments
-3. **Online/offline operation** with synchronized data
-4. **Hybrid AI features** that work both in the cloud and locally on-device
-5. **Distributed application architecture** with .NET Aspire
-
-## Key Hybrid Techniques Demonstrated
-
-### 1. Cross-Platform UI with Blazor
-- Single UI component library used across web and native platforms
-- Adaptive rendering based on platform capabilities
-- Consistent user experience regardless of device
-
-### 2. Hybrid Data Access
-- Works online (cloud-connected) and offline (local database)
-- Automatic synchronization when connectivity is restored
-- Common service interfaces with different implementations
-
-### 3. Hybrid AI Services
-- Cloud-based AI using Azure OpenAI for web clients
-- On-device AI using ONNX models for native clients
-- Consistent intelligence features regardless of connectivity
-
-### 4. Aspire Mobile Integration
-- Client-side settings generation from distributed application configuration
-- Mobile-friendly service discovery and resilience patterns
-
-## Solution Architecture
-
-The Hybridisms solution demonstrates these hybrid techniques through several key projects:
-
-### 1. **Hybridisms.Shared** ([README](Hybridisms.Shared/README.md))
-The core of the hybrid strategy, containing:
-- **Cross-Platform UI Components**: Blazor components used by both web and native clients
-- **Service Interfaces**: Common abstractions allowing for different implementations
-- **HybridRenderMode**: Utility that adapts rendering based on the runtime environment
-- **Shared Models**: Domain models used across all platforms
-
-### 2. **Hybridisms.Client.Native** ([README](Hybridisms.Client.Native/README.md))
-Demonstrates hybrid data access and intelligence:
-- **HybridNotesService**: Combines local and remote data access transparently
-- **HybridIntelligenceService**: Uses on-device AI when offline, cloud AI when online
-- **Local Database**: SQLite implementation for offline operation
-- **ONNX Integration**: On-device ML models for local intelligence features
-
-### 3. **Hybridisms.Client.NativeApp** ([README](Hybridisms.Client.NativeApp/README.md))
-Showcases Blazor Hybrid in MAUI:
-- **Blazor Hybrid UI**: Using web technologies in a native app shell
-- **Shared Components**: Reuses components from Hybridisms.Shared
-- **Online/Offline Support**: Works with or without connectivity
-
-### 4. **Hybridisms.Client.WebAssembly** ([README](Hybridisms.Client.WebAssembly/README.md))
-The browser-based client that:
-- **Shares UI**: Uses the same components as the native app
-- **Remote Services**: Connects to backend APIs for data and intelligence
-
-### 5. **Hybridisms.AppHost** ([README](Hybridisms.AppHost/README.md))
-Demonstrates .NET Aspire integration:
-- **Mobile Project Integration**: Uses AspireMobile to connect mobile clients
-- **Configuration Generation**: Creates settings files for mobile/WASM clients
-
-## Key Hybrid Implementation Techniques
-
-### Shared UI with Blazor
-- **Component Library**: Components in `Hybridisms.Shared` are designed to be used in both web and native contexts
-- **HybridRenderMode**: Custom utility that selects the appropriate render mode (Server, WebAssembly, Auto) based on runtime platform
-- **Responsive Design**: UI adapts to different form factors and screen sizes
-
-### Hybrid Data Services
-- **Service Interfaces**: Common interfaces like `INotesService` and `IIntelligenceService` define capabilities
-- **Multiple Implementations**: Remote (HTTP), Local (SQLite), and Hybrid implementations
-- **Hybrid Pattern**: The `HybridNotesService` in Client.Native transparently switches between local and remote data sources
-  - Uses local database when offline
-  - Syncs with cloud when online
-  - Provides consistent API regardless of connectivity
-
-### Hybrid AI Features
-- **Abstracted Intelligence**: Common `IIntelligenceService` interface
-- **Web Implementation**: Uses Azure OpenAI via REST APIs
-- **Native Implementation**: Uses ONNX runtime with local ML models
-  - `OnnxChatClient`: On-device chat capabilities
-  - `OnnxEmbeddingClient`: On-device text embeddings for semantic search
-
-### Hybrid App Configuration
-- **AspireMobile Integration**: Extends .NET Aspire to work with mobile/WASM clients
-- **Common Service Defaults**: Shared configuration for resilience and service discovery
-
-## Learning From This Demo
-
-- Examine `HybridRenderMode.cs` to see how UI adapts to different platforms
-- Study `HybridNotesService.cs` and `HybridIntelligenceService.cs` to understand online/offline strategies
-- View common Blazor components in the `Shared` project to see cross-platform UI patterns
+## Overview
+Hybridisms is a demonstration solution that showcases how to build modern, distributed, and resilient hybrid applications using .NET 9, Blazor, .NET MAUI, WebAssembly, ONNX, and cloud-native patterns. The solution is designed to run seamlessly across web, native, and cloud environments, leveraging shared code, hybrid service fallback, and advanced orchestration.
 
 ---
 
-*This demo shows hybrid app development techniques using .NET technologies as of May 2025.*
+## Project Structure and Responsibilities
+
+### 1. Hybridisms.AppHost
+Orchestrates the entire distributed application using Aspire. Provisions resources (Azure OpenAI, SQLite), manages service discovery, and launches all hybrid app components (web, native, wasm).
+
+### 2. Hybridisms.Server.WebApp
+ASP.NET Core Web API and Blazor Server app. Hosts REST APIs and interactive Blazor components for notes, topics, notebooks, and AI features. Integrates with a local SQLite database and Azure OpenAI for backend intelligence.
+
+### 3. Hybridisms.Client.WebAssembly
+Blazor WebAssembly (WASM) client. Runs in the browser, connects to backend APIs for data and AI, and uses shared contracts for seamless hybrid integration.
+
+### 4. Hybridisms.Client.NativeApp
+.NET MAUI Blazor Hybrid app for mobile and desktop. Combines native device features with Blazor UI, supports both local (ONNX) and remote (cloud) AI/data services, and synchronizes with backend APIs.
+
+### 5. Hybridisms.Server
+Backend library for data access and advanced AI. Implements EF Core models, DbContext, and server-side intelligence services for hybrid scenarios.
+
+### 6. Hybridisms.Shared
+Defines shared models, interfaces, and remote service implementations. Enables code reuse and consistent contracts across all hybrid clients and servers.
+
+### 7. Hybridisms.Hosting
+Shared Blazor component library for layouts, navigation, and UI elements. Ensures a consistent look and feel across all hybrid app frontends.
+
+### 8. Hybridisms.Server.Worker
+.NET Worker Service that migrates and seeds the database on startup, ensuring the backend is ready for all hybrid clients.
+
+### 9. Hybridisms.Client.Native
+Provides native data and AI service implementations for on-device storage and intelligence, including ONNX-powered AI and hybrid fallback logic.
+
+### 10. ServiceDefaults Projects
+These projects provide service discovery, HTTP resilience, and telemetry defaults for their respective environments, enabling robust hybrid communication and monitoring.
+
+- **Hybridisms.Server.ServiceDefaults**
+- **Hybridisms.Client.Native.ServiceDefaults**
+- **Hybridisms.Client.WebAssembly.ServiceDefaults**
+
+
+### 11. Stub Projects
+Used for Aspire orchestration and service discovery, allowing the native and WASM clients to be managed as part of the distributed hybrid app.
+
+- **stubs/Hybridisms.Client.NativeApp.ClientStub**
+- **stubs/Hybridisms.Client.WebAssembly.ClientStub**
+
+
+---
+
+## How Hybridisms Enables Hybrid Scenarios
+
+### 1. Shared Contracts and Code Reuse
+All clients and servers reference `Hybridisms.Shared`, ensuring a single source of truth for models and interfaces. This enables seamless data flow and business logic reuse across web, native, and cloud.
+
+```csharp
+public interface INotesService
+{
+    Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default);
+    // ...
+}
+```
+
+### 2. Hybrid Service Fallback (Local/Remote)
+Native clients (MAUI) use hybrid services that automatically switch between remote (cloud) and local (on-device) implementations for resilience and offline support.
+
+```csharp
+public class HybridIntelligenceService : IIntelligenceService
+{
+    public Task<string> GenerateNoteContentsAsync(string prompt, CancellationToken cancellationToken = default)
+    {
+        // Try remote, fallback to local
+        return WithLocalFallback(
+            ct => remote.GenerateNoteContentsAsync(prompt, ct),
+            ct => local.GenerateNoteContentsAsync(prompt, ct),
+            cancellationToken);
+    }
+}
+```
+
+### 3. Hybrid Rendering (Blazor Server + WASM)
+The server registers both server and WebAssembly render modes for Blazor components, allowing the same UI to run in the browser or on the server.
+
+```csharp
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode()
+    .AddInteractiveWebAssemblyRenderMode();
+```
+
+### 4. On-Device AI with ONNX
+Native clients bundle ONNX models for local AI (embeddings, chat, recommendations), enabling hybrid intelligence even when offline.
+
+```csharp
+builder.Services.AddOptions<OnnxEmbeddingClient.EmbeddingClientOptions>()
+    .Configure(options => {
+        options.BundledPath = "Models/miniml_model.zip";
+        options.ExtractedPath = Path.Combine(FileSystem.AppDataDirectory, "Models", "embedding_model");
+    });
+```
+
+### 5. Service Discovery and Resilience
+ServiceDefaults projects configure dynamic endpoint discovery, HTTP resilience, and OpenTelemetry for robust hybrid communication and monitoring.
+
+```xml
+<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
+```
+
+### 6. Distributed Orchestration with Aspire
+Aspire manages all resources, dependencies, and project lifecycles, ensuring all hybrid app components are discoverable and connected.
+
+```csharp
+builder.AddMauiProject("mobile", "Hybridisms.Client.NativeApp")
+    .InGroup(appsGroup)
+    .WithReference(web)
+    .ExcludeFromManifest();
+```
+
+### 7. Automated Backend Setup
+A .NET Worker Service seeds and migrates the database on startup, ensuring the backend is always ready for hybrid clients.
+
+```csharp
+protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+{
+    await dbContext.Database.EnsureCreatedAsync(stoppingToken);
+    // ...
+}
+```
+
+---
+
+## Summary
+Hybridisms demonstrates a comprehensive approach to hybrid app development, combining shared code, hybrid service fallback, on-device AI, dynamic service discovery, and distributed orchestration. The result is a resilient, flexible, and modern app architecture that runs seamlessly across web, native, and cloud environments.
