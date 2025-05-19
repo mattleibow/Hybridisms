@@ -24,7 +24,7 @@ public static class AspireAppSettings
             ["OTEL_EXPORTER_OTLP_PROTOCOL"] = "grpc",
             ["OTEL_METRIC_EXPORT_INTERVAL"] = "1000",
             ["OTEL_METRICS_EXEMPLAR_FILTER"] = "trace_based",
-            ["OTEL_RESOURCE_ATTRIBUTES"] = "service.instance.id=mscunmnk",
+            ["OTEL_RESOURCE_ATTRIBUTES"] = "service.instance.id=heufaxsa",
             ["OTEL_SERVICE_NAME"] = "mobile",
             ["OTEL_TRACES_SAMPLER"] = "always_on",
             ["services:webapp:http:0"] = "http://localhost:5118",
