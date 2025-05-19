@@ -3,6 +3,13 @@ using Microsoft.Extensions.AI;
 
 namespace Hybridisms.Client.Native.Services;
 
+// TODO: AI - [A] Embedded AI service
+/// <summary>
+/// EmbeddedIntelligenceService is a local AI service that allows the app to generate and classify notes
+/// even when the device is offline.
+/// 
+/// It uses local ONNX models for generating note contents and recommending topics.
+/// </summary>
 public class EmbeddedIntelligenceService(EmbeddedNotesService notesService, OnnxChatClient chatClient, OnnxEmbeddingClient embeddingClient) : IIntelligenceService
 {
     public async Task<string> GenerateNoteContentsAsync(string prompt, CancellationToken cancellationToken = default)
@@ -35,7 +42,7 @@ public class EmbeddedIntelligenceService(EmbeddedNotesService notesService, Onnx
             """;
 
         var response = await chatClient.GetResponseAsync(systemPrompt, prompt, 100, cancellationToken);
-        
+
         return response ?? "";
     }
 

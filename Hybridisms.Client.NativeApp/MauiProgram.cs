@@ -17,7 +17,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
 
 #if DEBUG
-        builder.Configuration.AddDevTunnelsInMemoryCollection(AspireAppSettings.Settings, null); // TODO: set up dev tunnels
+        builder.Configuration.AddDevTunnelsInMemoryCollection(AspireAppSettings.Settings, null);
 #endif
 
         // Add Aspire/ServiceDefaults configuration
@@ -34,41 +34,56 @@ public static class MauiProgram
         // Add Blazor WebView for hybrid UI
         builder.Services.AddMauiBlazorWebView();
 
-        // Register SQLite database context for local data storage
-        builder.Services.AddOptions<HybridismsEmbeddedDbContext.DbContextOptions>()
-            .Configure(options =>
-            {
-                options.DatabasePath = Path.Combine(FileSystem.Current.AppDataDirectory, "data", "hybridisms.db");
-            });
-        builder.Services.AddSingleton<HybridismsEmbeddedDbContext>();
 
-        // Register notes services
-        builder.Services.AddHttpClient<RemoteNotesService>(static client => client.BaseAddress = new("https://webapp/"));
-        builder.Services.AddSingleton<EmbeddedNotesService>();
+        // TODO: AI - [D] Embedded/remote/hybrid AI access
+        {
+            // 1. Register ONNX clients for local AI processing
+            builder.Services.AddOptions<OnnxEmbeddingClient.EmbeddingClientOptions>()
+                .Configure(options =>
+                {
+                    options.BundledPath = "Models/miniml_model.zip";
+                    options.ExtractedPath = Path.Combine(FileSystem.AppDataDirectory, "Models", "embedding_model");
+                });
+            builder.Services.AddSingleton<OnnxEmbeddingClient>();
+            builder.Services.AddOptions<OnnxChatClient.ChatClientOptions>()
+                .Configure(options =>
+                {
+                    options.BundledPath = "Models/qwen2_model.zip";
+                    options.ExtractedPath = Path.Combine(FileSystem.AppDataDirectory, "Models", "chat_model");
+                });
+            builder.Services.AddSingleton<OnnxChatClient>();
 
-        // Register ONNX clients for local AI processing
-        builder.Services.AddOptions<OnnxEmbeddingClient.EmbeddingClientOptions>()
-            .Configure(options => 
-            {
-                options.BundledPath = "Models/miniml_model.zip";
-                options.ExtractedPath = Path.Combine(FileSystem.AppDataDirectory, "Models", "embedding_model");
-            });
-        builder.Services.AddSingleton<OnnxEmbeddingClient>();
-        builder.Services.AddOptions<OnnxChatClient.ChatClientOptions>()
-            .Configure(options => 
-            {
-                options.BundledPath = "Models/qwen2_model.zip";
-                options.ExtractedPath = Path.Combine(FileSystem.AppDataDirectory, "Models", "chat_model");
-            });
-        builder.Services.AddSingleton<OnnxChatClient>();
+            // 2. Register the local AI service for direct AI access
+            builder.Services.AddSingleton<EmbeddedIntelligenceService>();
 
-        // Register intelligence services for AI capabilities
-        builder.Services.AddHttpClient<RemoteIntelligenceService>(static client => client.BaseAddress = new("https://webapp/"));
-        builder.Services.AddSingleton<EmbeddedIntelligenceService>();
+            // 3. Register the remote REST endpoint for remote/cloud AI access
+            builder.Services.AddHttpClient<RemoteIntelligenceService>(static client => client.BaseAddress = new("https://webapp/"));
 
-        // Register the hybrid services that we will use
-        builder.Services.AddScoped<INotesService, HybridNotesService>();
-        builder.Services.AddScoped<IIntelligenceService, HybridIntelligenceService>();
+            // 4. Register the hybrid services that will manage the AI access
+            builder.Services.AddScoped<IIntelligenceService, HybridIntelligenceService>();
+        }
+
+
+        // TODO: Data - [D] Embedded/remote/hybrid data access
+        {
+            // 1. Register SQLite database context for local data storage
+            builder.Services.AddOptions<HybridismsEmbeddedDbContext.DbContextOptions>()
+                .Configure(options =>
+                {
+                    options.DatabasePath = Path.Combine(FileSystem.Current.AppDataDirectory, "data", "hybridisms.db");
+                });
+            builder.Services.AddSingleton<HybridismsEmbeddedDbContext>();
+
+            // 2. Register the local data service for direct data access
+            builder.Services.AddSingleton<EmbeddedNotesService>();
+
+            // 3. Register the remote REST endpoint for remote/cloud data access
+            builder.Services.AddHttpClient<RemoteNotesService>(static client => client.BaseAddress = new("https://webapp/"));
+
+            // 4. Register the hybrid services that will manage the data access
+            builder.Services.AddScoped<INotesService, HybridNotesService>();
+        }
+
 
         // Register MauiAppFileProvider as a singleton for IAppFileProvider
         builder.Services.AddSingleton<IAppFileProvider, MauiAppFileProvider>();

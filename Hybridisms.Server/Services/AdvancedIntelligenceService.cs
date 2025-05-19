@@ -3,6 +3,7 @@ using Microsoft.Extensions.AI;
 
 namespace Hybridisms.Server.Services;
 
+// TODO: AI - [Z] Cloud OpenAI service
 public class AdvancedIntelligenceService(INotesService db, IChatClient chatClient) : IIntelligenceService
 {
     private sealed record SelectedLabel(string Label, string Reason);

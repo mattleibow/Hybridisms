@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Hybridisms.Server.WebApp.Controllers;
 
+// TODO: AI - [D] Intelligence REST controller
 [ApiController]
 [Route("api/[controller]")]
 public class IntelligenceController(IIntelligenceService intelligenceService) : ControllerBase

@@ -3,6 +3,13 @@ using Hybridisms.Shared.Services;
 
 namespace Hybridisms.Client.Native.Services;
 
+// TODO: Data - Embedded/local data service
+/// <summary>
+/// EmbeddedNotesService is a local data service that provides access to notes, notebooks, and topics from
+/// the embedded SQLite database.
+/// 
+/// It allows the app to function offline and provides a simple API for managing notes.
+/// </summary>
 public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesService
 {
     private Task? ensureCreatedTask;

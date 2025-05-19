@@ -3,7 +3,7 @@ using Azure.Provisioning.CognitiveServices;
 var builder = DistributedApplication.CreateBuilder(args);
 
 
-// AI
+// TODO: AI - [Z] Aspire
 
 var ai = builder.AddAzureOpenAI("ai")
     .ConfigureInfrastructure(infra =>
@@ -20,7 +20,7 @@ ai.AddDeployment(
     modelVersion: "2024-07-18");
 
 
-// Data
+// TODO: Data - [Z] Aspire
 
 
 var dataGroup = builder.AddGroup("data");
@@ -37,7 +37,7 @@ var dbSeeder = builder.AddProject<Projects.Hybridisms_Server_Worker>("db-seeder"
     .WaitFor(db);
 
 
-// Apps
+// TODO: Apps - [Z] Aspire
 
 var appsGroup = builder.AddGroup("apps");
 

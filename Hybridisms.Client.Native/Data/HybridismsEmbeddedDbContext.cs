@@ -3,6 +3,11 @@ using SQLite;
 
 namespace Hybridisms.Client.Native.Data;
 
+// TODO: Data - Embedded/local database
+/// <summary>
+/// HybridismsEmbeddedDbContext is a lightweight SQLite database context for the Hybridisms application.
+/// It provides access to the database and manages the creation of tables.
+/// </summary>
 public class HybridismsEmbeddedDbContext(IOptions<HybridismsEmbeddedDbContext.DbContextOptions> options)
 {
     private SQLiteAsyncConnection? connection;

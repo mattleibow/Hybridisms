@@ -4,6 +4,14 @@ using Microsoft.Extensions.Options;
 
 namespace Hybridisms.Client.Native.Services;
 
+// TODO: AI - [B] Embedded ONNX model client base
+/// <summary>
+/// OnnxModelClient is a base class for ONNX model clients and provides the functionality
+/// to extract and manage ONNX models.
+/// 
+/// The main purpose of this class is to ensure that the ONNX model is extracted from
+/// the app package and available for use.
+/// </summary>
 public abstract class OnnxModelClient<TOptions>(IAppFileProvider fileProvider, IOptions<TOptions> options, ILogger<OnnxModelClient<TOptions>>? logger) : object
     where TOptions : OnnxModelClient<TOptions>.OnnxModelClientOptions
 {

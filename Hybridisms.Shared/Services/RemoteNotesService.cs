@@ -2,6 +2,10 @@ using System.Net.Http.Json;
 
 namespace Hybridisms.Shared.Services;
 
+// TODO: AI - [D] Remote data service
+/// <summary>
+/// RemoteNotesService provides methods for accessing and manipulating notes, notebooks, and topics using the remote REST endpoints.
+/// </summary>
 public class RemoteNotesService(HttpClient httpClient) : INotesService
 {
     public async Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default)

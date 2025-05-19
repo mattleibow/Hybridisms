@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hybridisms.Server.Data;
 
+// TODO: Data - [Z] 
 public class HybridismsDbContext(DbContextOptions<HybridismsDbContext> options) : DbContext(options)
 {
     public DbSet<NoteEntity> Notes => Set<NoteEntity>();

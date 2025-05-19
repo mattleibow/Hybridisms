@@ -1,6 +1,7 @@
 ﻿@page "/"
 
 @using Hybridisms.Shared.Services
+@* // TODO: UI - [A] Static page with SSR *@
 @attribute [StreamRendering]
 
 @inject INotesService NotesService
@@ -51,6 +52,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        // Simulate a delay to show loading state
+        await Task.Delay(3000);
+
         notes = await NotesService.GetStarredNotesAsync();
     }
 }

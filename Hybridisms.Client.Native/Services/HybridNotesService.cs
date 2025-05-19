@@ -5,6 +5,15 @@ using Microsoft.Extensions.Options;
 
 namespace Hybridisms.Client.Native.Services;
 
+// TODO: Data - Hybrid data service
+/// <summary>
+/// HybridNotesService is a hybrid data service that combines local and remote data access.
+/// 
+/// It first attempts to fetch data from the local SQLite database, and then syncs it with the remote service.
+/// This allows the app to work offline and each time data is requested, it also checks the remote service
+/// for any updates. Although the service does not ensure immediate consistency, it provides an eventual
+/// consistency on the next request.
+/// </summary>
 public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService local, IOptions<HybridismsEmbeddedDbContext.DbContextOptions> options, ILogger<HybridNotesService>? logger, IAppFileProvider fileProvider)
     : INotesService
 {
@@ -136,7 +145,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
                 // Start sync in background, but do not block return
                 logger?.LogInformation("Syncing local data to remote...");
                 _ = SyncAsync(localData, cancellationToken);
-            
+
                 return localData;
             }
         }

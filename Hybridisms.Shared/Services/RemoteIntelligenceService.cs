@@ -2,6 +2,10 @@ using System.Net.Http.Json;
 
 namespace Hybridisms.Shared.Services;
 
+// TODO: AI - [D] Remote Intelligence service
+/// <summary>
+/// RemoteIntelligenceService provides methods for recommending topics and generating note contents using the remote REST endpoints.
+/// </summary>
 public class RemoteIntelligenceService(HttpClient httpClient) : IIntelligenceService
 {
     public async Task<ICollection<TopicRecommendation>> RecommendTopicsAsync(Note note, int count = 3, CancellationToken cancellationToken = default)
@@ -10,7 +14,7 @@ public class RemoteIntelligenceService(HttpClient httpClient) : IIntelligenceSer
         response.EnsureSuccessStatusCode();
 
         var recommendations = await response.Content.ReadFromJsonAsync<ICollection<TopicRecommendation>>();
-        
+
         return recommendations ?? [];
     }
 

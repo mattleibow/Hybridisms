@@ -1,0 +1,17 @@
+{
+    "todo-tree.filtering.excludeGlobs": [
+        "**/node_modules/*/**",
+        "**/wwwroot/lib/*/**"
+    ],
+    "todo-tree.general.tags": [
+        "BUG",
+        "HACK",
+        "FIXME",
+        "TODO",
+        "XXX",
+        "[ ]",
+        "[x]",
+        "DEMO"
+    ],
+    "todo-tree.tree.sortTagsOnlyViewAlphabetically": true
+}

@@ -12,7 +12,11 @@ builder.Configuration.AddInMemoryCollection(AspireAppSettings.Settings);
 builder.AddServiceDefaults();
 
 // The Blazor WASM client only supports the remote HTTP service
+
+// TODO: AI - [D] WASM Remote data service
 builder.Services.AddHttpClient<INotesService, RemoteNotesService>(static client => client.BaseAddress = new("https+http://webapp/"));
+
+// TODO: AI - [D] WASM Remote AI service
 builder.Services.AddHttpClient<IIntelligenceService, RemoteIntelligenceService>(static client => client.BaseAddress = new("https+http://webapp/"));
 
 var app = builder.Build();

@@ -13,22 +13,29 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-// Add EF Core DbContext with SQLite
-builder.Services.AddDbContext<HybridismsDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("db")?.Replace("Extensions=[]", "")));
 
-// Add controller services
-builder.Services.AddControllers();
-
-// Register intelligence service
-builder.Services.AddScoped<IIntelligenceService, AdvancedIntelligenceService>();
-
-// The Blazor server app only supports the local database service
-builder.Services.AddScoped<INotesService, DbNotesService>();
+// TODO: AI - [D] Cloud AI service registration
 
 // Register Azure OpenAI client
 builder.AddAzureOpenAIClient("ai")
     .AddChatClient("ai-model");
+
+// Register intelligence service
+builder.Services.AddScoped<IIntelligenceService, AdvancedIntelligenceService>();
+
+// The blazor service can acces the DB directly
+builder.Services.AddScoped<INotesService, DbNotesService>();
+
+
+// TODO: Data - [D] Cloud database registration
+
+// Add EF Core DbContext with SQLite
+builder.Services.AddDbContext<HybridismsDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("db")?.Replace("Extensions=[]", "")));
+
+
+// Add controller services
+builder.Services.AddControllers();
 
 var app = builder.Build();
 

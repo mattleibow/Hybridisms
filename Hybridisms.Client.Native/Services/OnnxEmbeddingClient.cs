@@ -6,6 +6,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Hybridisms.Client.Native.Services;
 
+// TODO: AI - [B] Embedded ONNX embedding client
+/// <summary>
+/// OnnxEmbeddingClient is a client for working with ONNX models for embedding.
+/// 
+/// It provides invisible support for loading models and tokenizers, and allows for
+/// getting ranked matches based on cosine similarity.
+/// </summary>
 public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmbeddingClient.EmbeddingClientOptions> options, ILogger<OnnxEmbeddingClient>? logger)
     : OnnxModelClient<OnnxEmbeddingClient.EmbeddingClientOptions>(fileProvider, options, logger)
 {

@@ -7,6 +7,13 @@ using System.Text;
 
 namespace Hybridisms.Client.Native.Services;
 
+// TODO: AI - [B] Embedded ONNX chat client
+/// <summary>
+/// OnnxChatClient is a client for working with ONNX models for chat.
+/// 
+/// It provides functionality for loading generative AI models, getting chat responses,
+/// and streaming chat responses.
+/// </summary>
 public class OnnxChatClient(IAppFileProvider fileProvider, IOptions<OnnxChatClient.ChatClientOptions> options, ILogger<OnnxChatClient>? logger)
     : OnnxModelClient<OnnxChatClient.ChatClientOptions>(fileProvider, options, logger), IChatClient
 {
@@ -69,7 +76,7 @@ public class OnnxChatClient(IAppFileProvider fileProvider, IOptions<OnnxChatClie
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         logger?.LogInformation("Getting streaming chat response...");
-        
+
         var client = await LoadClientAsync();
 
         await foreach (var update in client.GetStreamingResponseAsync(messages, options, cancellationToken).WithCancellation(cancellationToken))
