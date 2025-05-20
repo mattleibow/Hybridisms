@@ -119,7 +119,8 @@ public static class AppDefaultsExtensions
         {
             builder.SetOpenTelemetryEnvironmentVariables();
 
-            builder.Services.AddOpenTelemetry().UseOtlpExporter();
+            builder.Services.AddOpenTelemetry()
+                .UseOtlpExporter();
         }
 
         // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.Exporter package)

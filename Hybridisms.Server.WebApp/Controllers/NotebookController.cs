@@ -1,3 +1,4 @@
+using Hybridisms.Server.Services;
 using Hybridisms.Shared.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,10 +24,21 @@ public class NotebookController(INotesService noteService) : ControllerBase
         return Ok(notebook);
     }
 
-    [HttpGet("{notebookId}/notes")]
-    public async Task<IActionResult> GetNotes(Guid notebookId)
+    [HttpPost("{notebookId}/notes")]
+    public async Task<IActionResult> SaveNotes(Guid notebookId, [FromQuery] bool fetchAll, [FromBody] IEnumerable<Note> notes)
     {
-        var notes = await noteService.GetNotesAsync(notebookId);
+        var savedNotes = await noteService.SaveNotebookNotesAsync(notebookId, notes);
+        if (!fetchAll)
+            return Ok(savedNotes);
+
+        var allNotes = await noteService.GetNotesAsync(notebookId, includeDeleted: true);
+        return Ok(allNotes);
+    }
+
+    [HttpGet("{notebookId}/notes")]
+    public async Task<IActionResult> GetNotes(Guid notebookId, [FromQuery] bool includeDeleted = false)
+    {
+        var notes = await noteService.GetNotesAsync(notebookId, includeDeleted);
         return Ok(notes);
     }
 

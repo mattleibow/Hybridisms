@@ -1,4 +1,5 @@
 using Hybridisms.Client.Native.Services;
+using Hybridisms.Shared.Services;
 
 namespace Hybridisms.Client.NativeApp.Services;
 

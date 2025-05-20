@@ -6,6 +6,8 @@ namespace Hybridisms.Server.Services;
 
 public class DbNotesService(HybridismsDbContext db) : INotesService
 {
+    // Notebook
+
     public async Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default)
     {
         var entities = await db.Notebooks
@@ -14,7 +16,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         var mapped = entities
             .Select(MapNotebook)
             .ToList();
-            
+
         return mapped;
     }
 
@@ -49,6 +51,8 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
             // and save it to the database
 
             entity = MapNotebook(notebook);
+            entity.Id = Guid.NewGuid();
+            
             db.Notebooks.Add(entity);
 
             await db.SaveChangesAsync(cancellationToken);
@@ -72,17 +76,79 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         return notebook;
     }
 
-    public async Task<ICollection<Note>> GetNotesAsync(Guid notebookId, CancellationToken cancellationToken = default)
+    public async Task<ICollection<Note>> SaveNotebookNotesAsync(Guid notebookId, IEnumerable<Note> notes, CancellationToken cancellationToken = default)
+    {
+        var savedNotes = new List<Note>();
+
+        foreach (var note in notes)
+        {
+            var saved = await SaveNoteAsync(notebookId, note, cancellationToken);
+            savedNotes.Add(saved);
+        }
+
+        return savedNotes;
+    }
+
+    private async Task<Note> SaveNoteAsync(Guid notebookId, Note note, CancellationToken cancellationToken)
+    {
+        var entity = await db.Notes
+            .Include(n => n.Topics)
+            .FirstOrDefaultAsync(n => n.Id == note.Id, cancellationToken);
+
+        if (entity is null)
+        {
+            // If the note does not exist, create a new one
+            entity = MapNote(note);
+            entity.Id = Guid.NewGuid();
+            entity.NotebookId = notebookId;
+
+            db.Notes.Add(entity);
+            
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        else if (note.Modified > entity.Modified)
+        {
+            // If the incoming note is newer, update the entity
+            MapNote(note, entity);
+            entity.NotebookId = notebookId;
+            
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        // else: If the incoming note is older or the same age, do nothing
+
+        // return the updated or newly created note
+        note = MapNote(entity);
+        return note;
+    }
+
+
+    // Note
+
+    public async Task<ICollection<Note>> GetStarredNotesAsync(CancellationToken cancellationToken = default)
     {
         var notes = await db.Notes
-            .Where(n => n.NotebookId == notebookId)
+            .Where(n => n.Starred && !n.IsDeleted)
             .Include(n => n.Topics)
             .ToListAsync(cancellationToken);
 
         var mapped = notes
             .Select(MapNote)
             .ToList();
-            
+
+        return mapped;
+    }
+
+    public async Task<ICollection<Note>> GetNotesAsync(Guid notebookId, bool includeDeleted = false, CancellationToken cancellationToken = default)
+    {
+        var notes = await db.Notes
+            .Where(n => n.NotebookId == notebookId && (includeDeleted || !n.IsDeleted))
+            .Include(n => n.Topics)
+            .ToListAsync(cancellationToken);
+
+        var mapped = notes
+            .Select(MapNote)
+            .ToList();
+
         return mapped;
     }
 
@@ -98,19 +164,18 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         return (Note?)MapNote(entity);
     }
 
-    public async Task<ICollection<Note>> GetStarredNotesAsync(CancellationToken cancellationToken = default)
+    public async Task DeleteNoteAsync(Guid noteId, CancellationToken cancellationToken = default)
     {
-        var notes = await db.Notes
-            .Where(n => n.Starred)
-            .Include(n => n.Topics)
-            .ToListAsync(cancellationToken);
-
-        var mapped = notes
-            .Select(MapNote)
-            .ToList();
-
-        return mapped;
+        var entity = await db.Notes.FirstOrDefaultAsync(n => n.Id == noteId, cancellationToken);
+        if (entity != null)
+        {
+            entity.IsDeleted = true;
+            await db.SaveChangesAsync(cancellationToken);
+        }
     }
+
+
+    // Topic
 
     public async Task<ICollection<Topic>> GetTopicsAsync(CancellationToken cancellationToken = default)
     {
@@ -122,40 +187,6 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
             .ToList();
 
         return mapped;
-    }
-
-    public async Task<ICollection<Note>> SaveNotesAsync(IEnumerable<Note> notes, CancellationToken cancellationToken = default)
-    {
-        var savedNotes = new List<Note>();
-        foreach (var note in notes)
-        {
-            var updatedNote = await SaveNoteAsync(note, cancellationToken);
-            savedNotes.Add(updatedNote);
-        }
-        return savedNotes;
-    }
-
-    private async Task<Note> SaveNoteAsync(Note note, CancellationToken cancellationToken)
-    {
-        var entity = await db.Notes.Include(n => n.Topics).FirstOrDefaultAsync(n => n.Id == note.Id, cancellationToken);
-        if (entity is null)
-        {
-            // If the note does not exist, create a new one
-            entity = MapNote(note);
-            db.Notes.Add(entity);
-            await db.SaveChangesAsync(cancellationToken);
-        }
-        else if (note.Modified > entity.Modified)
-        {
-            // If the incoming note is newer, update the entity
-            MapNote(note, entity);
-            await db.SaveChangesAsync(cancellationToken);
-        }
-        // else: If the incoming note is older or the same age, do nothing
-
-        // return the updated or newly created note
-        note = MapNote(entity);
-        return note;
     }
 
     public async Task<ICollection<Topic>> SaveTopicsAsync(IEnumerable<Topic> topics, CancellationToken cancellationToken = default)
@@ -176,13 +207,17 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         {
             // If the topic does not exist, create a new one
             entity = MapTopic(topic);
+            entity.Id = Guid.NewGuid();
+            
             db.Topics.Add(entity);
+            
             await db.SaveChangesAsync(cancellationToken);
         }
         else if (topic.Modified > entity.Modified)
         {
             // If the incoming topic is newer, update the entity
             MapTopic(topic, entity);
+            
             await db.SaveChangesAsync(cancellationToken);
         }
         // else: If the incoming topic is older or the same age, do nothing
@@ -191,6 +226,9 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         topic = MapTopic(entity);
         return topic;
     }
+
+
+    // Mappers
 
     private static Notebook MapNotebook(NotebookEntity entity) =>
         new Notebook
@@ -206,6 +244,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
         new Note
         {
             Id = note.Id,
+            IsDeleted = note.IsDeleted,
             Title = note.Title,
             Content = note.Content,
             Starred = note.Starred,
@@ -240,6 +279,7 @@ public class DbNotesService(HybridismsDbContext db) : INotesService
     {
         entity ??= new NoteEntity();
         entity.Id = model.Id;
+        entity.IsDeleted = model.IsDeleted;
         entity.Title = model.Title;
         entity.Content = model.Content;
         entity.Starred = model.Starred;

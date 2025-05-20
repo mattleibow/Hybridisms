@@ -1,3 +1,4 @@
+using Hybridisms.Server.Services;
 using Hybridisms.Shared.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,10 +24,10 @@ public class NotesController(INotesService noteService) : ControllerBase
         return Ok(note);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> SaveNotes([FromBody] IEnumerable<Note> notes)
+    [HttpDelete("{noteId}")]
+    public async Task<IActionResult> DeleteNoteById(Guid noteId)
     {
-        var savedNotes = await noteService.SaveNotesAsync(notes);
-        return Ok(savedNotes);
+        await noteService.DeleteNoteAsync(noteId);
+        return NoContent();
     }
 }

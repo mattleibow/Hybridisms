@@ -1,5 +1,8 @@
-@page "/note/{noteId}/edit"
+@page "/notebook/{notebookId}/notes/new"
+@page "/notebook/{notebookId}/notes/{noteId}/edit"
+
 @* // TODO: UI - [B] Interactive page with WS and WASM *@
+@attribute [StreamRendering]
 @rendermode HybridRenderMode.InteractiveAuto
 
 @using Hybridisms.Shared.Services
@@ -9,13 +12,19 @@
 @inject IIntelligenceService IntelligenceService
 @inject NavigationManager NavigationManager
 
-<h3>Edit Note</h3>
+<h3>@(IsEditMode ? "Edit Note" : "Add Note")</h3>
 
-@if (noteNotFound)
+<p><em>Render Mode: @RendererInfo.Name</em></p>
+
+@if (notebookNotFound)
+{
+    <div class="alert alert-danger">Notebook not found.</div>
+}
+else if (noteNotFound)
 {
     <div class="alert alert-danger">Note not found.</div>
 }
-else if (note == null)
+else if (notebook is null || note is null)
 {
     <p><em>Loading...</em></p>
 }
@@ -38,17 +47,24 @@ else
             <InputTextArea id="content" rows="10" class="form-control mt-2" @bind-Value="note.Content" @oninput="OnNoteChanged" />
         </div>
         <TagInput Tags="tagNames" AvailableTags="availableTags" TagsChanged="OnTagsChanged" Label="Topics" Placeholder="Add topics..." RecommendedTags="recommendedTags" />
-        <button type="submit" class="btn btn-success">Save</button>
+        <button type="submit" class="btn btn-success">@(IsEditMode ? "Save" : "Add Note")</button>
         <button type="button" class="btn btn-secondary ms-2" @onclick="GoBack">Cancel</button>
     </EditForm>
 }
 
 @code {
     [Parameter]
+    public string? notebookId { get; set; }
+    [Parameter]
     public string? noteId { get; set; }
+
+    private Notebook? notebook;
+    private bool notebookNotFound = false;
 
     private Note? note;
     private bool noteNotFound = false;
+
+    private bool IsEditMode => !string.IsNullOrEmpty(noteId);
 
     private List<string> tagNames = [];
     private List<string> availableTags = [];
@@ -60,16 +76,36 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        if (!string.IsNullOrEmpty(noteId) && Guid.TryParse(noteId, out var id))
-            note = await NotesService.GetNoteAsync(id);
-        
-        if (note is null)
+        // load the notebook
+        if (!string.IsNullOrEmpty(notebookId) && Guid.TryParse(notebookId, out var nbId))
+            notebook = await NotesService.GetNotebookAsync(nbId);
+
+        if (notebook is null)
         {
-            noteNotFound = true;
+            notebookNotFound = true;
             return;
         }
 
-        tagNames = note.Topics.Select(t => t.Name).ToList();
+        if (IsEditMode)
+        {
+            // load the note
+            if (Guid.TryParse(noteId, out var nId))
+                note = await NotesService.GetNoteAsync(nId);
+
+            if (note is null)
+            {
+                noteNotFound = true;
+                return;
+            }
+
+            tagNames = note.Topics.Select(t => t.Name).ToList();
+        }
+        else
+        {
+            // create a new note
+            note = new Note { NotebookId = notebook.Id, Topics = [] };
+            tagNames = [];
+        }
 
         // Load available tags
         availableTopicObjects = await NotesService.GetTopicsAsync();
@@ -78,16 +114,16 @@ else
 
     private async Task HandleValidSubmit()
     {
-        if (note is not null)
+        if (notebook is not null && note is not null)
         {
-            await NotesService.SaveNoteAsync(note);
+            await NotesService.SaveNotebookNoteAsync(notebook.Id, note);
             GoBack();
         }
     }
 
     private Task OnTagsChanged(List<string> tags)
     {
-        if (note != null)
+        if (note is not null)
         {
             note.Topics = tags
                 .Select(t => availableTopicObjects.FirstOrDefault(tp => tp.Name == t) ?? new Topic { Name = t })
@@ -98,17 +134,14 @@ else
 
     private void GoBack()
     {
-        if (note is not null)
-            NavigationManager.NavigateTo($"/notebook/{note?.NotebookId}/notes");
-        else
-            NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo($"/notebook/{notebookId}/notes");
     }
 
     private async Task OnNoteChanged(ChangeEventArgs e)
     {
         debounceCts?.Cancel();
         debounceCts = new CancellationTokenSource();
-        
+
         var token = debounceCts.Token;
         try
         {
@@ -141,7 +174,7 @@ else
     {
         if (string.IsNullOrWhiteSpace(note?.Content))
             return;
-        
+
         isGenerating = true;
 
         try

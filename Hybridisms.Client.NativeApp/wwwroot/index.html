@@ -10,15 +10,22 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="Hybridisms.Client.NativeApp.styles.css" />
     <link rel="icon" href="data:,">
+    <script>
+        window.isBlazorHybridApp = true;
+    </script>
 </head>
 
 <body>
 
     <div class="status-bar-safe-area"></div>
 
+    <div id="services"></div>
+
     <div id="app">Loading...</div>
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
+
+    <script src="_content/Hybridisms.Hosting/lib/bootstrap/dist/js/bootstrap.js"></script>
 
 </body>
 

@@ -23,6 +23,9 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
         }
     }
 
+
+    // Notebook
+
     public async Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default)
     {
         await EnsureCreatedAsync();
@@ -60,7 +63,13 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
             cancellationToken.ThrowIfCancellationRequested();
 
             var entity = await db.Notebooks.FirstOrDefaultAsync(n => n.Id == notebook.Id);
+
             entity = MapNotebook(notebook, entity);
+
+            // If this is a new entity, then we need a new ID
+            if (entity.Id == Guid.Empty)
+                entity.Id = Guid.NewGuid();
+
             savedEntities.Add(entity);
         }
 
@@ -69,12 +78,94 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
         return notebooks.ToList();
     }
 
-    public async Task<ICollection<Note>> GetNotesAsync(Guid notebookId, CancellationToken cancellationToken = default)
+    public async Task<ICollection<Note>> SaveNotebookNotesAsync(Guid notebookId, IEnumerable<Note> notes, CancellationToken cancellationToken = default)
+    {
+        await EnsureCreatedAsync();
+
+        var savedEntities = new List<NoteEntity>();
+        var removedMappings = new List<Guid>();
+        var savedMappings = new List<NoteTopicEntity>();
+        foreach (var note in notes)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await SaveTopicsAsync(note.Topics, cancellationToken);
+
+            var entity = await db.Notes.FirstOrDefaultAsync(n => n.Id == note.Id);
+
+            entity = await MapNoteTopicsAsync(note, entity, cancellationToken);
+            entity.NotebookId = notebookId;
+
+            // If this is a new entity, then we need a new ID
+            if (entity.Id == Guid.Empty)
+                entity.Id = Guid.NewGuid();
+
+            savedEntities.Add(entity);
+
+            // Update the note-topic mapping
+            var currentNoteTopics = await db.NoteTopics
+                .Where(nt => nt.NoteId == entity.Id)
+                .ToListAsync();
+
+            // Remove the mappings that are no longer needed
+            var removedMappingsIds = currentNoteTopics
+                .Where(nt => !note.Topics.Any(t => t.Id == nt.TopicId))
+                .Select(nt => nt.Id!)
+                .ToList();
+            removedMappings.AddRange(removedMappingsIds);
+
+            // Add the new mappings
+            var newMappings = note.Topics
+                .Where(t => !currentNoteTopics.Any(nt => nt.TopicId == t.Id))
+                .Select(t => new NoteTopicEntity
+                {
+                    Id = Guid.NewGuid(),
+                    NoteId = entity.Id,
+                    TopicId = t.Id,
+                })
+                .ToList();
+            savedMappings.AddRange(newMappings);
+        }
+
+        await db.Notes.InsertOrReplaceAllAsync(savedEntities);
+        await db.NoteTopics.DeleteAsync(map => removedMappings.Contains(map.Id));
+        await db.NoteTopics.InsertOrReplaceAllAsync(savedMappings);
+
+        var savedNotes = savedEntities
+            .Select(MapNote)
+            .ToList();
+
+        return savedNotes;
+    }
+
+
+    // Note
+
+    public async Task<ICollection<Note>> GetStarredNotesAsync(CancellationToken cancellationToken = default)
     {
         await EnsureCreatedAsync();
 
         var notes = await db.Notes
-            .Where(n => n.NotebookId == notebookId)
+            .Where(n => n.Starred && !n.IsDeleted)
+            .ToListAsync();
+
+        var mapped = new List<Note>();
+        foreach (var note in notes)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var mappedNote = await MapNoteTopicsAsync(note, cancellationToken);
+            mapped.Add(mappedNote);
+        }
+        return mapped;
+    }
+
+    public async Task<ICollection<Note>> GetNotesAsync(Guid notebookId, bool includeDeleted = false, CancellationToken cancellationToken = default)
+    {
+        await EnsureCreatedAsync();
+
+        var notes = await db.Notes
+            .Where(n => n.NotebookId == notebookId && (includeDeleted || !n.IsDeleted))
             .ToListAsync();
 
         var mapped = new List<Note>();
@@ -93,7 +184,8 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
         await EnsureCreatedAsync();
 
         var note = await db.Notes
-            .FirstOrDefaultAsync(n => n.Id == noteId);
+            .Where(n => n.Id == noteId && !n.IsDeleted)
+            .FirstOrDefaultAsync();
 
         if (note is null)
             return null;
@@ -101,24 +193,19 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
         return await MapNoteTopicsAsync(note, cancellationToken);
     }
 
-    public async Task<ICollection<Note>> GetStarredNotesAsync(CancellationToken cancellationToken = default)
+    public async Task DeleteNoteAsync(Guid noteId, CancellationToken cancellationToken = default)
     {
         await EnsureCreatedAsync();
-
-        var notes = await db.Notes
-            .Where(n => n.Starred)
-            .ToListAsync();
-
-        var mapped = new List<Note>();
-        foreach (var note in notes)
+        var note = await db.Notes.FirstOrDefaultAsync(n => n.Id == noteId);
+        if (note != null)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var mappedNote = await MapNoteTopicsAsync(note, cancellationToken);
-            mapped.Add(mappedNote);
+            note.IsDeleted = true;
+            await db.Notes.InsertOrReplaceAllAsync(new[] { note });
         }
-        return mapped;
     }
+
+
+    // Topic
 
     public async Task<ICollection<Topic>> GetTopicsAsync(CancellationToken cancellationToken = default)
     {
@@ -134,27 +221,6 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
         return mapped;
     }
 
-    public async Task<ICollection<Note>> SaveNotesAsync(IEnumerable<Note> notes, CancellationToken cancellationToken = default)
-    {
-        await EnsureCreatedAsync();
-
-        var savedEntities = new List<NoteEntity>();
-        foreach (var note in notes)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            await SaveTopicsAsync(note.Topics, cancellationToken);
-
-            var entity = await db.Notes.FirstOrDefaultAsync(n => n.Id == note.Id);
-            entity = await MapNoteTopicsAsync(note, entity, cancellationToken);
-            savedEntities.Add(entity);
-        }
-
-        await db.Notes.InsertOrReplaceAllAsync(savedEntities);
-
-        return notes.ToList();
-    }
-
     public async Task<ICollection<Topic>> SaveTopicsAsync(IEnumerable<Topic> topics, CancellationToken cancellationToken = default)
     {
         await EnsureCreatedAsync();
@@ -165,7 +231,13 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
             cancellationToken.ThrowIfCancellationRequested();
 
             var entity = await db.Topics.FirstOrDefaultAsync(t => t.Id == topic.Id);
+
             entity = MapTopic(topic, entity);
+
+            // If this is a new entity, then we need a new ID
+            if (entity.Id == Guid.Empty)
+                entity.Id = Guid.NewGuid();
+
             savedEntities.Add(entity);
         }
 
@@ -173,6 +245,9 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
 
         return topics.ToList();
     }
+
+
+    // Mappers
 
     private static Notebook MapNotebook(NotebookEntity entity) =>
         new Notebook
@@ -188,6 +263,7 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
         new Note
         {
             Id = note.Id,
+            IsDeleted = note.IsDeleted,
             Title = note.Title,
             Content = note.Content,
             Starred = note.Starred,
@@ -264,6 +340,7 @@ public class EmbeddedNotesService(HybridismsEmbeddedDbContext db) : INotesServic
     {
         entity ??= new NoteEntity();
         entity.Id = model.Id;
+        entity.IsDeleted = model.IsDeleted;
         entity.Title = model.Title;
         entity.Content = model.Content;
         entity.Starred = model.Starred;

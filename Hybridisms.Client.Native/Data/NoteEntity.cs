@@ -13,6 +13,8 @@ public class NoteEntity : BaseEntity
 
     public Guid NotebookId { get; set; }
 
+    public bool IsDeleted { get; set; } = false;
+
     [Ignore]
     public NotebookEntity? Notebook { get; set; }
 

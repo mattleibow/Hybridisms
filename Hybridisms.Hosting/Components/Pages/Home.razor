@@ -8,7 +8,7 @@
 
 <PageTitle>Starred Notes</PageTitle>
 
-<script src="@Assets["_content/Hybridisms.Hosting/components/notes.js"]"></script>
+<PageScript Src="@Assets["./_content/Hybridisms.Hosting/components/pages/home.js"]" />
 
 <h1>Starred Notes</h1>
 
@@ -53,7 +53,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         // Simulate a delay to show loading state
-        await Task.Delay(3000);
+        await Task.Delay(1000);
 
         notes = await NotesService.GetStarredNotesAsync();
     }

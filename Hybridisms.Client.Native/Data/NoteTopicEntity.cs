@@ -5,8 +5,8 @@ namespace Hybridisms.Client.Native.Data;
 [Table("NoteTopics")]
 public class NoteTopicEntity
 {
-    [PrimaryKey, AutoIncrement]
-    public int Id { get; set; }
+    [PrimaryKey]
+    public Guid Id { get; set; }
 
     [Indexed(Name = "CompositeKey", Order = 1, Unique = true)]
     public Guid NoteId { get; set; }

@@ -25,8 +25,8 @@ Hybridisms.Client.NativeApp is a .NET MAUI Blazor Hybrid project that serves as 
 ## Example: Hybrid Service Registration
 ```csharp
 // Register the hybrid services that we will use
-builder.Services.AddScoped<INotesService, HybridNotesService>();
-builder.Services.AddScoped<IIntelligenceService, HybridIntelligenceService>();
+builder.Services.AddSingleton<INotesService, HybridNotesService>();
+builder.Services.AddSingleton<IIntelligenceService, HybridIntelligenceService>();
 ```
 
 ## Example: ONNX Model Integration for Embedded AI

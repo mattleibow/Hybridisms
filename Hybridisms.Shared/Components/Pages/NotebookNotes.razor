@@ -1,4 +1,5 @@
 @page "/notebook/{id}/notes"
+
 @attribute [StreamRendering]
 
 @using Hybridisms.Shared.Services
@@ -7,13 +8,17 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>@notebookTitle</PageTitle>
+<PageScript Src="@Assets["./_content/Hybridisms.Shared/components/pages/notebook-notes.js"]" />
 
 <h1>@notebookTitle</h1>
+
+<p><em>Render Mode: @RendererInfo.Name</em></p>
 
 @if (notebook != null)
 {
     <div class="mb-3">
         <a class="btn btn-secondary" href="/notebook/@notebook.Id/edit">Edit Notebook</a>
+        <a class="btn btn-primary ms-2" href="/notebook/@notebook.Id/notes/new">Add Note</a>
     </div>
 }
 
@@ -34,12 +39,15 @@ else
     <div class="row g-3">
         @foreach (var note in notes)
         {
-            <div class="col-12 col-md-6 col-xl-4">
+            <div class="note-card-container col-12 col-md-6 col-xl-4">
                 <div class="note-card card h-100 mb-3">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h5 class="card-title mb-0">@note.Title</h5>
-                            <a class="btn btn-primary btn-sm ms-2" href="/note/@note.Id/edit">Edit</a>
+                            <div>
+                                <a class="btn btn-primary btn-sm ms-2" href="/notebook/@notebook.Id/notes/@note.Id/edit">Edit</a>
+                                <button class="btn btn-danger btn-sm ms-2" id="note-card-@note.Id" onclick="window.Hybridisms.deleteNote('@note.Id', '@notebook.Id')">Delete</button>
+                            </div>
                         </div>
                         <p class="card-text">
                             @((MarkupString)note.HtmlContent)

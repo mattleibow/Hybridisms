@@ -3,6 +3,7 @@ using Hybridisms.Server.Services;
 using Hybridisms.Server.WebApp.Components;
 using Hybridisms.Shared.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,7 @@ builder.AddAzureOpenAIClient("ai")
 // Register intelligence service
 builder.Services.AddScoped<IIntelligenceService, AdvancedIntelligenceService>();
 
-// The blazor service can acces the DB directly
+// The blazor service can access the DB directly
 builder.Services.AddScoped<INotesService, DbNotesService>();
 
 

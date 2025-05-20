@@ -16,4 +16,6 @@ public class NoteEntity : BaseEntity
     public NotebookEntity Notebook { get; set; } = null!;
 
     public bool Starred { get; set; } = false;
+
+    public bool IsDeleted { get; set; } = false;
 }

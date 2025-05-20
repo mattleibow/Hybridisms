@@ -16,6 +16,12 @@ public static class MauiProgram
 
         var builder = MauiApp.CreateBuilder();
 
+        builder.ConfigureContainer(new DefaultServiceProviderFactory(new ServiceProviderOptions
+        {
+            ValidateScopes = true,
+            ValidateOnBuild = true,
+        }));
+
 #if DEBUG
         builder.Configuration.AddDevTunnelsInMemoryCollection(AspireAppSettings.Settings, null);
 #endif
@@ -60,7 +66,7 @@ public static class MauiProgram
             builder.Services.AddHttpClient<RemoteIntelligenceService>(static client => client.BaseAddress = new("https://webapp/"));
 
             // 4. Register the hybrid services that will manage the AI access
-            builder.Services.AddScoped<IIntelligenceService, HybridIntelligenceService>();
+            builder.Services.AddSingleton<IIntelligenceService, HybridIntelligenceService>();
         }
 
 
@@ -81,12 +87,13 @@ public static class MauiProgram
             builder.Services.AddHttpClient<RemoteNotesService>(static client => client.BaseAddress = new("https://webapp/"));
 
             // 4. Register the hybrid services that will manage the data access
-            builder.Services.AddScoped<INotesService, HybridNotesService>();
+            builder.Services.AddSingleton<INotesService, HybridNotesService>();
         }
 
 
         // Register MauiAppFileProvider as a singleton for IAppFileProvider
         builder.Services.AddSingleton<IAppFileProvider, MauiAppFileProvider>();
+        builder.Services.AddSingleton<JavaScriptNotesService>();
 
 #if DEBUG
         // Enable developer tools and debug logging in debug builds
