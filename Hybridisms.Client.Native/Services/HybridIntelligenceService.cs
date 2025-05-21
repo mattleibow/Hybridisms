@@ -10,7 +10,7 @@ namespace Hybridisms.Client.Native.Services;
 /// The service first attempts to use the remote AI service, and if it fails, it falls back to the local AI service.
 /// It provides a seamless experience for interacting with AI, regardless of the user's connectivity. 
 /// </summary>
-public class HybridIntelligenceService(RemoteIntelligenceService remote, EmbeddedIntelligenceService local, ILogger<HybridIntelligenceService>? logger) : IIntelligenceService
+public class HybridIntelligenceService(RemoteIntelligenceService remote, EmbeddedIntelligenceService local, RemoteAvailabilityWatcher availability, ILogger<HybridIntelligenceService>? logger) : IIntelligenceService
 {
     public Task<ICollection<TopicRecommendation>> RecommendTopicsAsync(Note note, int count = 3, CancellationToken cancellationToken = default)
     {
@@ -40,6 +40,15 @@ public class HybridIntelligenceService(RemoteIntelligenceService remote, Embedde
         Func<CancellationToken, Task<ICollection<T>>> localFunc,
         CancellationToken cancellationToken = default)
     {
+        // If we failed too recently, don't try right away
+        if (availability.IsRemoteAvailable)
+        {
+            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote request.", availability.LastUnavailable);
+
+            var results = await localFunc(cancellationToken);
+            return results;
+        }
+
         try
         {
             var results = await remoteFunc(cancellationToken);
@@ -47,6 +56,9 @@ public class HybridIntelligenceService(RemoteIntelligenceService remote, Embedde
         }
         catch
         {
+            availability.MarkRemoteUnavailable();
+            logger?.LogWarning("Remote servers are unavailable, falling back to local service.");
+
             var results = await localFunc(cancellationToken);
             return results;
         }
@@ -60,6 +72,15 @@ public class HybridIntelligenceService(RemoteIntelligenceService remote, Embedde
         Func<CancellationToken, Task<T>> localFunc,
         CancellationToken cancellationToken = default)
     {
+        // If we failed too recently, don't try right away
+        if (availability.IsRemoteAvailable)
+        {
+            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote request.", availability.LastUnavailable);
+
+            var results = await localFunc(cancellationToken);
+            return results;
+        }
+
         try
         {
             var results = await remoteFunc(cancellationToken);
@@ -67,6 +88,9 @@ public class HybridIntelligenceService(RemoteIntelligenceService remote, Embedde
         }
         catch
         {
+            availability.MarkRemoteUnavailable();
+            logger?.LogWarning("Remote servers are unavailable, falling back to local service.");
+
             var results = await localFunc(cancellationToken);
             return results;
         }

@@ -14,13 +14,9 @@ namespace Hybridisms.Client.Native.Services;
 /// for any updates. Although the service does not ensure immediate consistency, it provides an eventual
 /// consistency on the next request.
 /// </summary>
-public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService local, IOptions<HybridismsEmbeddedDbContext.DbContextOptions> options, ILogger<HybridNotesService>? logger, IAppFileProvider fileProvider)
+public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService local, RemoteAvailabilityWatcher availability, IOptions<HybridismsEmbeddedDbContext.DbContextOptions> options, ILogger<HybridNotesService>? logger, IAppFileProvider fileProvider)
     : INotesService
 {
-    private static readonly TimeSpan MinRetryTime = TimeSpan.FromSeconds(30);
-
-    DateTimeOffset lastFailTime = DateTimeOffset.MinValue;
-
     // Notebook
 
     public Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default)
@@ -113,9 +109,9 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         await local.DeleteNoteAsync(noteId, cancellationToken);
 
         // If we failed too recently, don't try right away
-        if (DateTimeOffset.UtcNow - lastFailTime < MinRetryTime)
+        if (availability.IsRemoteAvailable)
         {
-            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote deletion.", DateTimeOffset.UtcNow - lastFailTime);
+            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote deletion.", availability.LastUnavailable);
             return;
         }
 
@@ -128,7 +124,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         {
             // ignore remote errors for offline
 
-            lastFailTime = DateTimeOffset.UtcNow;
+            availability.MarkRemoteUnavailable();
             logger?.LogWarning("Failed to delete note with id {ID} remotely.", noteId);
         }
     }
@@ -205,9 +201,9 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         }
 
         // If we failed too recently, don't try right away
-        if (DateTimeOffset.UtcNow - lastFailTime < MinRetryTime)
+        if (availability.IsRemoteAvailable)
         {
-            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote fetch.", DateTimeOffset.UtcNow - lastFailTime);
+            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote fetch.", availability.LastUnavailable);
             return [];
         }
 
@@ -226,7 +222,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
                 // If both fail, just bail out
                 remoteData = [];
 
-                lastFailTime = DateTimeOffset.UtcNow;
+                availability.MarkRemoteUnavailable();
                 logger?.LogWarning("Failed to fetch remote data.");
             }
 
@@ -259,9 +255,9 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         async Task SyncAsync(ICollection<T> localData, CancellationToken cancellationToken)
         {
             // If we failed too recently, don't try right away
-            if (DateTimeOffset.UtcNow - lastFailTime < MinRetryTime)
+            if (availability.IsRemoteAvailable)
             {
-                logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping data sync.", DateTimeOffset.UtcNow - lastFailTime);
+                logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping data sync.", availability.LastUnavailable);
                 return;
             }
 
@@ -275,7 +271,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
             }
             catch
             {
-                lastFailTime = DateTimeOffset.UtcNow;
+                availability.MarkRemoteUnavailable();
                 logger?.LogWarning("Failed to sync data.");
             }
         }
@@ -321,9 +317,9 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         }
 
         // If we failed too recently, don't try right away
-        if (DateTimeOffset.UtcNow - lastFailTime < MinRetryTime)
+        if (availability.IsRemoteAvailable)
         {
-            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote fetch.", DateTimeOffset.UtcNow - lastFailTime);
+            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote fetch.", availability.LastUnavailable);
             return null;
         }
 
@@ -338,7 +334,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         {
             // Ignore and fallback
 
-            lastFailTime = DateTimeOffset.UtcNow;
+            availability.MarkRemoteUnavailable();
             logger?.LogWarning("Failed to fetch remote data.");
         }
 
@@ -366,7 +362,7 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
             }
             catch
             {
-                lastFailTime = DateTimeOffset.UtcNow;
+                availability.MarkRemoteUnavailable();
                 logger?.LogWarning("Failed to sync data.");
             }
         }

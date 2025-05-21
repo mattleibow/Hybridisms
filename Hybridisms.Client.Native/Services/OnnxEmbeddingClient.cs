@@ -1,8 +1,8 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.ML.Tokenizers;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
 
 namespace Hybridisms.Client.Native.Services;
 
@@ -42,10 +42,10 @@ public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmb
         return (session, tokenizer);
     }
 
-    public async Task<ICollection<(T Match, float Similarity)>> GetRankedMatchesAsync<T>(string text, IEnumerable<T> options, int count = 3, CancellationToken cancellationToken = default) =>
+    public async Task<ICollection<SimilarityResult<T>>> GetRankedMatchesAsync<T>(string text, IEnumerable<T> options, int count = 3, CancellationToken cancellationToken = default) =>
         await GetRankedMatchesAsync(text, options, x => x?.ToString(), count, cancellationToken);
 
-    public async Task<ICollection<(T Match, float Similarity)>> GetRankedMatchesAsync<T>(string text, IEnumerable<T> options, Func<T, string?> optionTextSelector, int count = 3, CancellationToken cancellationToken = default)
+    public async Task<ICollection<SimilarityResult<T>>> GetRankedMatchesAsync<T>(string text, IEnumerable<T> options, Func<T, string?> optionTextSelector, int count = 3, CancellationToken cancellationToken = default)
     {
         logger?.LogInformation("Ranking matches for text: {Text}", text);
 
@@ -55,6 +55,16 @@ public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmb
             return [];
         }
 
+        var reduced = await Task.Run(async () =>
+            await GetRankedMatchesAsyncInternal(text, options, optionTextSelector, count, cancellationToken));
+
+        logger?.LogInformation("Selected {Count} ranked matches.", reduced.Count);
+
+        return reduced;
+    }
+
+    private async Task<ICollection<SimilarityResult<T>>> GetRankedMatchesAsyncInternal<T>(string text, IEnumerable<T> options, Func<T, string?> optionTextSelector, int count = 3, CancellationToken cancellationToken = default)
+    {
         await LoadSessionAsync();
 
         var topicEmbeddings = new List<(T Option, float[] Embedding)>();
@@ -81,15 +91,13 @@ public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmb
         var noteEmbedding = GetEmbedding(text);
 
         var ranked = topicEmbeddings
-            .Select(te => (Match: te.Option, Similarity: CosineSimilarity(noteEmbedding, te.Embedding)))
+            .Select(te => new SimilarityResult<T>(te.Option, CosineSimilarity(noteEmbedding, te.Embedding)))
             .OrderByDescending(x => x.Similarity)
             .ToList();
 
         var reduced = ranked
             .Take(count)
             .ToList();
-
-        logger?.LogInformation("Selected {Count} ranked matches.", reduced.Count);
 
         return reduced;
     }

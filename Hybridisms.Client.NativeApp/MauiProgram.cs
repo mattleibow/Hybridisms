@@ -40,18 +40,21 @@ public static class MauiProgram
         // Add Blazor WebView for hybrid UI
         builder.Services.AddMauiBlazorWebView();
 
+        builder.Services.AddSingleton<RemoteAvailabilityWatcher>();
 
         // TODO: AI - [D] Embedded/remote/hybrid AI access
         {
             // 1. Register ONNX clients for local AI processing
-            builder.Services.AddOptions<OnnxEmbeddingClient.EmbeddingClientOptions>()
+            builder.Services
+                .AddOptions<OnnxEmbeddingClient.EmbeddingClientOptions>()
                 .Configure(options =>
                 {
                     options.BundledPath = "Models/miniml_model.zip";
                     options.ExtractedPath = Path.Combine(FileSystem.AppDataDirectory, "Models", "embedding_model");
                 });
             builder.Services.AddSingleton<OnnxEmbeddingClient>();
-            builder.Services.AddOptions<OnnxChatClient.ChatClientOptions>()
+            builder.Services
+                .AddOptions<OnnxChatClient.ChatClientOptions>()
                 .Configure(options =>
                 {
                     options.BundledPath = "Models/qwen2_model.zip";

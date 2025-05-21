@@ -33,6 +33,10 @@ public abstract class OnnxModelClient(IAppFileProvider fileProvider, IOptions<On
         {
             await Task.Run(UnpackModelAsync);
         }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Failed to unpack model from {BundledPath} to {ExtractedPath}", options.Value.BundledPath, options.Value.ExtractedPath);
+        }
         finally
         {
             isModelReadyLock.Release();
