@@ -14,20 +14,20 @@ namespace Hybridisms.Client.Native.Services;
 /// getting ranked matches based on cosine similarity.
 /// </summary>
 public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmbeddingClient.EmbeddingClientOptions> options, ILogger<OnnxEmbeddingClient>? logger)
-    : OnnxModelClient<OnnxEmbeddingClient.EmbeddingClientOptions>(fileProvider, options, logger)
+    : OnnxModelClient(fileProvider, options, logger)
 {
     private BertTokenizer? tokenizer;
-    private InferenceSession? embeddingSession;
+    private InferenceSession? session;
 
     private async Task<(InferenceSession, BertTokenizer)> LoadSessionAsync()
     {
-        if (embeddingSession is not null && tokenizer is not null)
-            return (embeddingSession, tokenizer);
+        if (session is not null && tokenizer is not null)
+            return (session, tokenizer);
 
         await EnsureModelExtractedAsync();
 
-        if (embeddingSession is not null && tokenizer is not null)
-            return (embeddingSession, tokenizer);
+        if (session is not null && tokenizer is not null)
+            return (session, tokenizer);
 
         logger?.LogInformation("Loading ONNX model and tokenizer...");
 
@@ -35,14 +35,17 @@ public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmb
         tokenizer = BertTokenizer.Create(vocabPath);
 
         var modelPath = Path.Combine(options.Value.ExtractedPath, "model.onnx");
-        embeddingSession = new InferenceSession(modelPath);
+        session = new InferenceSession(modelPath);
 
         logger?.LogInformation("ONNX model and tokenizer loaded successfully.");
 
-        return (embeddingSession, tokenizer);
+        return (session, tokenizer);
     }
 
-    public async Task<ICollection<(T Match, float Similarity)>> GetRankedMatchesAsync<T>(string text, IEnumerable<T> options, Func<T, string> optionTextSelector, int count = 3, CancellationToken cancellationToken = default)
+    public async Task<ICollection<(T Match, float Similarity)>> GetRankedMatchesAsync<T>(string text, IEnumerable<T> options, int count = 3, CancellationToken cancellationToken = default) =>
+        await GetRankedMatchesAsync(text, options, x => x?.ToString(), count, cancellationToken);
+
+    public async Task<ICollection<(T Match, float Similarity)>> GetRankedMatchesAsync<T>(string text, IEnumerable<T> options, Func<T, string?> optionTextSelector, int count = 3, CancellationToken cancellationToken = default)
     {
         logger?.LogInformation("Ranking matches for text: {Text}", text);
 
@@ -52,7 +55,9 @@ public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmb
             return [];
         }
 
-        var topicEmbeddings = new List<(T Option, Tensor<float> Embedding)>();
+        await LoadSessionAsync();
+
+        var topicEmbeddings = new List<(T Option, float[] Embedding)>();
         foreach (var option in options)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -61,7 +66,7 @@ public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmb
             if (string.IsNullOrWhiteSpace(optionText))
                 continue;
 
-            var embedding = await GetEmbeddingAsync(optionText);
+            var embedding = GetEmbedding(optionText);
             topicEmbeddings.Add((option, embedding));
         }
 
@@ -73,30 +78,32 @@ public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmb
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var noteEmbedding = await GetEmbeddingAsync(text);
+        var noteEmbedding = GetEmbedding(text);
 
         var ranked = topicEmbeddings
             .Select(te => (Match: te.Option, Similarity: CosineSimilarity(noteEmbedding, te.Embedding)))
             .OrderByDescending(x => x.Similarity)
+            .ToList();
+
+        var reduced = ranked
             .Take(count)
             .ToList();
 
-        logger?.LogInformation("Found {Count} ranked matches.", ranked.Count);
+        logger?.LogInformation("Selected {Count} ranked matches.", reduced.Count);
 
-        return ranked;
+        return reduced;
     }
 
-    private async Task<Tensor<float>> GetEmbeddingAsync(string text)
+    private float[] GetEmbedding(string text)
     {
-        var (session, tokenizer) = await LoadSessionAsync();
+        if (session is null || tokenizer is null)
+            throw new InvalidOperationException("Session or tokenizer is not initialized.");
 
         var inputIds = tokenizer.EncodeToIds(text);
-        var inputIdsLong = inputIds.Select(i => (long)i).ToArray();
-        var inputIdsTensor = new DenseTensor<long>(inputIdsLong, [1, inputIds.Count]);
+        var inputIdsTensor = new DenseTensor<long>(inputIds.Select(i => (long)i).ToArray(), [1, inputIds.Count]);
 
         var typeIds = tokenizer.CreateTokenTypeIdsFromSequences(inputIds);
-        var typeIdsLong = typeIds.Take(inputIds.Count).Select(i => (long)i).ToArray();
-        var typeIdsTensor = new DenseTensor<long>(typeIdsLong, [1, inputIds.Count]);
+        var typeIdsTensor = new DenseTensor<long>(typeIds.Take(inputIds.Count).Select(i => (long)i).ToArray(), [1, inputIds.Count]);
 
         var attentionMask = inputIds.Select(id => id == 0 ? 0L : 1L).ToArray();
         var attentionMaskTensor = new DenseTensor<long>(attentionMask, [1, inputIds.Count]);
@@ -110,15 +117,15 @@ public class OnnxEmbeddingClient(IAppFileProvider fileProvider, IOptions<OnnxEmb
 
         using var results = session.Run(inputs);
 
-        return results[0].AsTensor<float>();
+        return results[0].AsTensor<float>().ToArray();
     }
 
-    private static float CosineSimilarity(Tensor<float> a, Tensor<float> b)
+    private static float CosineSimilarity(float[] a, float[] b)
     {
-        var dot = a.Zip(b, (x, y) => x * y).Sum();
-        var magA = (float)Math.Sqrt(a.Sum(x => x * x));
-        var magB = (float)Math.Sqrt(b.Sum(x => x * x));
-        return dot / (magA * magB);
+        var dotProduct = a.Zip(b, (x, y) => x * y).Sum();
+        var magnitudeA = (float)MathF.Sqrt(a.Sum(x => x * x));
+        var magnitudeB = (float)MathF.Sqrt(b.Sum(x => x * x));
+        return dotProduct / (magnitudeA * magnitudeB);
     }
 
     public class EmbeddingClientOptions : OnnxModelClientOptions

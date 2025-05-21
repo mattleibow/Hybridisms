@@ -15,7 +15,7 @@ namespace Hybridisms.Client.Native.Services;
 /// and streaming chat responses.
 /// </summary>
 public class OnnxChatClient(IAppFileProvider fileProvider, IOptions<OnnxChatClient.ChatClientOptions> options, ILogger<OnnxChatClient>? logger)
-    : OnnxModelClient<OnnxChatClient.ChatClientOptions>(fileProvider, options, logger), IChatClient
+    : OnnxModelClient(fileProvider, options, logger), IChatClient
 {
     private OnnxRuntimeGenAIChatClient? loadedClient;
 

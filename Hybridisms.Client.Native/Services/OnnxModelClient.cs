@@ -1,6 +1,7 @@
-using System.IO.Compression;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.IO.Compression;
+using static Hybridisms.Client.Native.Services.OnnxModelClient;
 
 namespace Hybridisms.Client.Native.Services;
 
@@ -12,8 +13,7 @@ namespace Hybridisms.Client.Native.Services;
 /// The main purpose of this class is to ensure that the ONNX model is extracted from
 /// the app package and available for use.
 /// </summary>
-public abstract class OnnxModelClient<TOptions>(IAppFileProvider fileProvider, IOptions<TOptions> options, ILogger<OnnxModelClient<TOptions>>? logger) : object
-    where TOptions : OnnxModelClient<TOptions>.OnnxModelClientOptions
+public abstract class OnnxModelClient(IAppFileProvider fileProvider, IOptions<OnnxModelClientOptions> options, ILogger<OnnxModelClient>? logger)
 {
     private readonly SemaphoreSlim isModelReadyLock = new(1, 1);
 
