@@ -2,7 +2,6 @@ using Hybridisms.Client.Native.Data;
 using Hybridisms.Shared.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Linq;
 
 namespace Hybridisms.Client.Native.Services;
 
@@ -18,6 +17,10 @@ namespace Hybridisms.Client.Native.Services;
 public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService local, IOptions<HybridismsEmbeddedDbContext.DbContextOptions> options, ILogger<HybridNotesService>? logger, IAppFileProvider fileProvider)
     : INotesService
 {
+    private static readonly TimeSpan MinRetryTime = TimeSpan.FromSeconds(30);
+
+    DateTimeOffset lastFailTime = DateTimeOffset.MinValue;
+
     // Notebook
 
     public Task<ICollection<Notebook>> GetNotebooksAsync(CancellationToken cancellationToken = default)
@@ -109,6 +112,13 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         // Delete locally first
         await local.DeleteNoteAsync(noteId, cancellationToken);
 
+        // If we failed too recently, don't try right away
+        if (DateTimeOffset.UtcNow - lastFailTime < MinRetryTime)
+        {
+            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote deletion.", DateTimeOffset.UtcNow - lastFailTime);
+            return;
+        }
+
         try
         {
             // Try delete remotely
@@ -117,6 +127,9 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         catch
         {
             // ignore remote errors for offline
+
+            lastFailTime = DateTimeOffset.UtcNow;
+            logger?.LogWarning("Failed to delete note with id {ID} remotely.", noteId);
         }
     }
 
@@ -163,8 +176,8 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         Func<CancellationToken, Task<ICollection<T>>> getRemote,
         Func<ICollection<T>, CancellationToken, Task<ICollection<T>>>? saveRemote,
         CancellationToken cancellationToken = default) =>
-        GetOrSyncAsync<T>(getLocal,  saveLocal, getRemote, saveRemote, null, cancellationToken);
-    
+        GetOrSyncAsync<T>(getLocal, saveLocal, getRemote, saveRemote, null, cancellationToken);
+
     private async Task<ICollection<T>> GetOrSyncAsync<T>(
         Func<CancellationToken, Task<ICollection<T>>> getLocal,
         Func<ICollection<T>, CancellationToken, Task<ICollection<T>>>? saveLocal,
@@ -191,6 +204,13 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
             }
         }
 
+        // If we failed too recently, don't try right away
+        if (DateTimeOffset.UtcNow - lastFailTime < MinRetryTime)
+        {
+            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote fetch.", DateTimeOffset.UtcNow - lastFailTime);
+            return [];
+        }
+
         // Remote data fetch
         {
             // No local data, fetch fresh from remote
@@ -201,10 +221,13 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
                 logger?.LogInformation("Fetching remote data...");
                 remoteData = await getRemote(cancellationToken);
             }
-            catch (Exception)
+            catch
             {
                 // If both fail, just bail out
                 remoteData = [];
+
+                lastFailTime = DateTimeOffset.UtcNow;
+                logger?.LogWarning("Failed to fetch remote data.");
             }
 
             // There was remote data, so save it to local
@@ -233,16 +256,28 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
             return filtered;
         }
 
-        async Task<ICollection<T>> SyncAsync(ICollection<T> localData, CancellationToken cancellationToken)
+        async Task SyncAsync(ICollection<T> localData, CancellationToken cancellationToken)
         {
-            // Save local data to remote
-            var remoteData = await SaveRemoteAsync(localData, cancellationToken);
+            // If we failed too recently, don't try right away
+            if (DateTimeOffset.UtcNow - lastFailTime < MinRetryTime)
+            {
+                logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping data sync.", DateTimeOffset.UtcNow - lastFailTime);
+                return;
+            }
 
-            // Save remote data to local
-            var data = await SaveLocalAsync(remoteData, cancellationToken);
+            try
+            {
+                // Save local data to remote
+                var remoteData = await SaveRemoteAsync(localData, cancellationToken);
 
-            // return the synced data
-            return data;
+                // Save remote data to local
+                var data = await SaveLocalAsync(remoteData, cancellationToken);
+            }
+            catch
+            {
+                lastFailTime = DateTimeOffset.UtcNow;
+                logger?.LogWarning("Failed to sync data.");
+            }
         }
 
         async Task<ICollection<T>> SaveRemoteAsync(ICollection<T> localData, CancellationToken cancellationToken)
@@ -285,6 +320,13 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
             return localItem;
         }
 
+        // If we failed too recently, don't try right away
+        if (DateTimeOffset.UtcNow - lastFailTime < MinRetryTime)
+        {
+            logger?.LogWarning("Remote servers were unavailable too recently {TimeAgo}, skipping remote fetch.", DateTimeOffset.UtcNow - lastFailTime);
+            return null;
+        }
+
         // Try remote if not found locally
         T? remoteItem = null;
         try
@@ -292,9 +334,12 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
             logger?.LogInformation("Fetching remote data...");
             remoteItem = await getRemote(cancellationToken);
         }
-        catch (Exception)
+        catch
         {
             // Ignore and fallback
+
+            lastFailTime = DateTimeOffset.UtcNow;
+            logger?.LogWarning("Failed to fetch remote data.");
         }
 
         if (remoteItem is not null)
@@ -309,16 +354,21 @@ public class HybridNotesService(RemoteNotesService remote, EmbeddedNotesService 
         logger?.LogWarning("No data found locally or remotely.");
         return null;
 
-        async Task<T> SyncAsync(T localData, CancellationToken cancellationToken)
+        async Task SyncAsync(T localData, CancellationToken cancellationToken)
         {
-            // Save local data to remote
-            var remoteData = await SaveRemoteAsync(localData, cancellationToken);
+            try
+            {
+                // Save local data to remote
+                var remoteData = await SaveRemoteAsync(localData, cancellationToken);
 
-            // Save remote data to local
-            var data = await SaveLocalAsync(remoteData, cancellationToken);
-
-            // return the synced data
-            return data;
+                // Save remote data to local
+                var data = await SaveLocalAsync(remoteData, cancellationToken);
+            }
+            catch
+            {
+                lastFailTime = DateTimeOffset.UtcNow;
+                logger?.LogWarning("Failed to sync data.");
+            }
         }
 
         async Task<T> SaveRemoteAsync(T localData, CancellationToken cancellationToken)
