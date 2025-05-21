@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="xunit" />
+		<PackageReference Include="xunit.runner.visualstudio" />
+		<PackageReference Include="NSubstitute" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../../Hybridisms.Client.Native/Hybridisms.Client.Native.csproj" />
+		<ProjectReference Include="../../Hybridisms.Shared/Hybridisms.Shared.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="..\..\artifacts\models\all-MiniLM-L6-v2\model.zip*" Link="Resources\Models\miniml_model.zip" CopyToOutputDirectory="PreserveNewest" />
+		<Content Include="..\..\artifacts\models\Qwen2.5-0.5B-Instruct\model_int8.zip*" Link="Resources\Models\qwen2_model.zip" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+</Project>
